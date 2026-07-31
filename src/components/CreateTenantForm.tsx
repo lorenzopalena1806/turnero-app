@@ -4,10 +4,12 @@ import { useActionState, useState } from 'react'
 import { createTenant } from '@/app/(super-admin)/admin/actions'
 import { Plus, X } from 'lucide-react'
 
-const initialState = {
-  error: '',
-  success: '',
+type ActionState = {
+  error?: string;
+  success?: string;
 }
+
+const initialState: ActionState = {}
 
 export default function CreateTenantForm() {
   const [isOpen, setIsOpen] = useState(false)
