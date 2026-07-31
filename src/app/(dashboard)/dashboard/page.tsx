@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { Trash2 } from 'lucide-react'
+import { Plus, Trash2, Scissors } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -50,89 +50,95 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Catálogo de Servicios</h2>
-          <p className="text-gray-500 text-sm mt-1">Administra los servicios de tu comercio.</p>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      {/* Column 1: Add Service */}
+      <div className="lg:col-span-1">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm sticky top-28">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Plus className="w-4 h-4" />
+            </div>
+            <h3 className="font-extrabold text-slate-900">Agregar Servicio</h3>
+          </div>
+          
+          <form action={addService} className="space-y-5">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nombre del Servicio</label>
+              <input 
+                type="text" 
+                name="name" 
+                required 
+                placeholder="Ej. Corte Clásico"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:bg-white transition-all text-sm font-medium"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Precio ($)</label>
+              <input 
+                type="number" 
+                name="price" 
+                step="0.01" 
+                required 
+                placeholder="1500.00"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:bg-white transition-all text-sm font-medium"
+              />
+            </div>
+            <button 
+              type="submit"
+              className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 active:scale-95 transition-all flex justify-center items-center gap-2"
+            >
+              Guardar Servicio
+            </button>
+          </form>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        
-        {/* Left Column: Formulario */}
-        <div className="w-full lg:w-1/3">
-          <div className="bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,0.1)] p-6 sticky top-24">
-            <h3 className="font-bold text-gray-800 mb-4 border-b pb-2">Nuevo Servicio</h3>
-            <form action={addService} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Servicio</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  required 
-                  placeholder="Ej. Corte de Cabello"
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-[#2563eb]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
-                <input 
-                  type="number" 
-                  name="price" 
-                  step="0.01" 
-                  required 
-                  placeholder="1500.00"
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-[#2563eb]"
-                />
-              </div>
-              <button 
-                type="submit"
-                className="w-full mt-2 bg-[#2563eb] hover:bg-[#1e40af] text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-300"
-              >
-                Guardar Servicio
-              </button>
-            </form>
-          </div>
+      {/* Column 2 & 3: Services List */}
+      <div className="lg:col-span-2">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-extrabold text-xl text-slate-900">Catálogo Activo</h3>
+          <span className="bg-slate-200 text-slate-700 text-xs font-bold px-3 py-1 rounded-full">
+            {services?.length || 0} items
+          </span>
         </div>
 
-        {/* Right Column: Grid de Servicios */}
-        <div className="w-full lg:w-2/3">
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
-            {services?.length === 0 ? (
-              <div className="col-span-full p-8 text-center bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,0.1)]">
-                <p className="text-gray-500">Aún no hay servicios en tu catálogo.</p>
-              </div>
-            ) : (
-              services?.map((service) => (
-                <div 
-                  key={service.id} 
-                  className="bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,0.1)] p-5 transition-transform duration-200 ease-in-out hover:scale-[1.02] flex flex-col justify-between"
-                >
-                  <div>
-                    <h4 className="font-bold text-gray-800 text-lg mb-2">{service.name}</h4>
-                    <p className="text-[#2563eb] font-bold text-xl">${service.price}</p>
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
-                    <form action={deleteService}>
-                      <input type="hidden" name="id" value={service.id} />
-                      <button 
-                        type="submit"
-                        className="text-gray-400 hover:text-red-600 transition-colors"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </form>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
+          {services?.length === 0 ? (
+            <div className="col-span-full bg-white rounded-2xl p-10 border border-slate-200 shadow-sm text-center">
+              <p className="text-slate-500 font-medium">Aún no tienes servicios en tu catálogo. Agrega el primero a la izquierda.</p>
+            </div>
+          ) : (
+            services?.map(service => (
+              <div key={service.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group flex flex-col justify-between h-full gap-4">
+                <div>
+                  <h4 className="font-extrabold text-slate-900 text-lg leading-tight">{service.name}</h4>
+                  <div className="mt-1">
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1">
+                      <Scissors className="w-3 h-3" /> Servicio
+                    </span>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+                
+                <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-auto">
+                  <span className="font-black text-emerald-600 text-xl">${service.price}</span>
+                  <form action={deleteService}>
+                    <input type="hidden" name="id" value={service.id} />
+                    <button 
+                      type="submit"
+                      className="text-slate-400 hover:text-rose-600 bg-white hover:bg-rose-50 p-2 rounded-xl transition-all active:scale-95 border border-transparent hover:border-rose-100"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </form>
+                </div>
+              </div>
+            ))
+          )}
         </div>
-
       </div>
+
     </div>
   )
 }
