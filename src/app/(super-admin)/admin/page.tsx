@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import CreateTenantForm from '@/components/CreateTenantForm'
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -22,9 +23,7 @@ export default async function AdminDashboardPage() {
       <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl p-6 shadow-xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Lista de Comercios</h2>
-          <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            + Nuevo Tenant
-          </button>
+          <CreateTenantForm />
         </div>
 
         <div className="overflow-x-auto">
