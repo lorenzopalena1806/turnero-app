@@ -1,96 +1,71 @@
 'use client'
 
-import { useState } from 'react'
-import { useCart, CartItem } from './CartProvider'
-import CartSidebar from './CartSidebar'
-import { ShoppingCart } from 'lucide-react'
+import { useCart } from './CartProvider'
+import { Plus } from 'lucide-react'
 
-type TenantStoreProps = {
-  tenant: {
-    name: string
-    whatsapp_number: string
-    ui_settings: any
-  }
-  services: any[]
-}
-
-export default function TenantStore({ tenant, services }: TenantStoreProps) {
-  const { addItem, totalItems } = useCart()
-  const [isCartOpen, setIsCartOpen] = useState(false)
+export default function TenantStore({ tenant, services }: { tenant: any, services: any[] }) {
+  const { addItem } = useCart()
 
   return (
-    <div className="max-w-5xl mx-auto p-4 md:p-8 pb-24">
-      <header className="mb-12 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4">
-          {tenant.name}
-        </h1>
-        <p className="text-neutral-400 text-lg">Selecciona los servicios que deseas reservar</p>
-      </header>
+    <div className="min-h-screen bg-[#0B0F19] font-sans relative overflow-hidden pb-32">
+      {/* Background Gradients */}
+      <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-violet-900/20 to-transparent pointer-events-none" />
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-40 -left-40 w-96 h-96 bg-violet-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.map(service => (
-          <div 
-            key={service.id} 
-            className="group relative bg-neutral-900/60 backdrop-blur-sm border border-neutral-800 rounded-2xl p-6 transition-all hover:bg-neutral-800/80 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-900/20"
-          >
-            <div className="mb-4">
-              <h3 className="text-xl font-semibold text-white mb-2">{service.name}</h3>
-              <p className="text-sm text-neutral-400 mb-4 h-10 line-clamp-2">{service.description || 'Sin descripción'}</p>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-neutral-300 flex items-center gap-1">
-                  <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  {service.duration_minutes} min
-                </span>
-                <span className="text-2xl font-bold text-white">${service.price}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => addItem({
-                id: service.id,
-                name: service.name,
-                price: service.price,
-                quantity: 1,
-                duration: service.duration_minutes
-              })}
-              className="w-full py-3 bg-neutral-800 hover:bg-blue-600 text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2 group-hover:bg-blue-600"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              Agregar al carrito
-            </button>
-          </div>
-        ))}
-
-        {services.length === 0 && (
-          <div className="col-span-full text-center py-20 text-neutral-500">
-            Este comercio aún no tiene servicios disponibles.
-          </div>
-        )}
-      </div>
-
-      {/* Floating Cart Button */}
-      {totalItems > 0 && (
-        <button
-          onClick={() => setIsCartOpen(true)}
-          className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-full shadow-2xl shadow-purple-900/40 text-white flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
-        >
-          <div className="relative">
-            <ShoppingCart className="w-6 h-6" />
-            <span className="absolute -top-2 -right-3 bg-white text-black text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-purple-600">
-              {totalItems}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 relative z-10">
+        
+        {/* Header */}
+        <div className="text-center mb-16 animate-in slide-in-from-bottom-4 duration-700">
+          <div className="inline-flex items-center justify-center p-2 bg-white/[0.03] border border-white/10 rounded-2xl mb-6 backdrop-blur-md">
+            <span className="px-3 py-1 bg-violet-500/20 text-violet-300 text-xs font-bold uppercase tracking-widest rounded-xl">
+              Reserva Online
             </span>
           </div>
-        </button>
-      )}
+          <h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight mb-4">
+            {tenant.name}
+          </h1>
+          <p className="text-lg text-slate-400 max-w-xl mx-auto">
+            Selecciona los servicios que deseas y reserva tu turno rápidamente a través de WhatsApp.
+          </p>
+        </div>
 
-      {/* Cart Sidebar */}
-      <CartSidebar 
-        isOpen={isCartOpen} 
-        onClose={() => setIsCartOpen(false)} 
-        tenantName={tenant.name}
-        whatsappNumber={tenant.whatsapp_number}
-      />
+        {/* Services Grid */}
+        {services.length === 0 ? (
+          <div className="text-center py-20 bg-white/[0.02] border border-white/5 rounded-3xl backdrop-blur-xl">
+            <p className="text-slate-400 text-lg">Próximamente agregaremos nuestros servicios.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 animate-in slide-in-from-bottom-8 duration-700 delay-150 fill-mode-both">
+            {services.map((service) => (
+              <div 
+                key={service.id} 
+                className="group relative bg-white/[0.02] border border-white/[0.05] rounded-3xl p-6 sm:p-8 hover:bg-white/[0.04] transition-all duration-300 hover:shadow-2xl hover:shadow-violet-900/20 hover:-translate-y-1 overflow-hidden"
+              >
+                {/* Card hover effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                
+                <div className="relative z-10 flex flex-col h-full justify-between gap-6">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{service.name}</h3>
+                    <p className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400">
+                      ${service.price}
+                    </p>
+                  </div>
+                  
+                  <button
+                    onClick={() => addItem(service)}
+                    className="w-full py-3.5 px-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all transform active:scale-95 border border-white/10 group-hover:border-violet-500/30 group-hover:bg-violet-500/10"
+                  >
+                    <Plus className="w-5 h-5 text-violet-400" />
+                    Agregar al turno
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   )
 }

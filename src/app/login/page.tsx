@@ -1,4 +1,5 @@
 import { login } from './actions'
+import { Scissors } from 'lucide-react'
 
 export default async function LoginPage({
   searchParams,
@@ -12,63 +13,71 @@ export default async function LoginPage({
   else if (error === 'no_role') errorMessage = 'Tu usuario no tiene ningún comercio (tenant) asignado. Contacta al administrador.'
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px]" />
-
-      <div className="w-full max-w-md bg-neutral-900/50 backdrop-blur-xl p-8 rounded-2xl border border-neutral-800 shadow-2xl relative z-10">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-white mb-2">Bienvenido</h1>
-          <p className="text-neutral-400">Ingresa a tu panel de control</p>
+    <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center p-4 relative overflow-hidden font-sans">
+      {/* Dynamic Background Blobs */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] bg-violet-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '7s' }} />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '10s' }} />
+      
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo/Icon */}
+        <div className="flex justify-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-tr from-violet-600 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 ring-1 ring-white/10 transform transition-transform hover:scale-110 hover:rotate-3">
+            <Scissors className="w-8 h-8 text-white" />
+          </div>
         </div>
 
-        {errorMessage && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm text-center font-medium">
-            {errorMessage}
-          </div>
-        )}
-
-        <form className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2" htmlFor="email">
-              Correo Electrónico
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="w-full px-4 py-3 bg-neutral-950/50 border border-neutral-800 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="tu@correo.com"
-            />
+        <div className="bg-white/[0.03] backdrop-blur-2xl p-8 sm:p-10 rounded-3xl border border-white/[0.05] shadow-2xl transition-all duration-300 hover:bg-white/[0.04]">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Turnero SaaS</h1>
+            <p className="text-slate-400">Panel de Control Premium</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-2" htmlFor="password">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              className="w-full px-4 py-3 bg-neutral-950/50 border border-neutral-800 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="••••••••"
-            />
-          </div>
+          {errorMessage && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm text-center font-medium shadow-inner">
+              {errorMessage}
+            </div>
+          )}
 
-          <button
-            formAction={login}
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium rounded-xl shadow-lg shadow-blue-900/20 transition-all transform active:scale-[0.98]"
-          >
-            Iniciar Sesión
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm text-neutral-500">
-          Usa tus credenciales de propietario o super administrador.
+          <form className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2" htmlFor="email">
+                Correo Electrónico
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                placeholder="tu@correo.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2" htmlFor="password">
+                Contraseña
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                placeholder="••••••••"
+              />
+            </div>
+            
+            <button
+              formAction={login}
+              className="w-full mt-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-500/25 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+            >
+              Ingresar al Sistema
+            </button>
+          </form>
         </div>
+        
+        <p className="text-center text-slate-500 text-sm mt-8">
+          &copy; {new Date().getFullYear()} TurneroApp. Todos los derechos reservados.
+        </p>
       </div>
     </div>
   )
