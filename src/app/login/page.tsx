@@ -1,6 +1,16 @@
 import { login } from './actions'
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
+  
+  let errorMessage = ''
+  if (error === 'auth_failed') errorMessage = 'Correo o contraseña incorrectos.'
+  else if (error === 'no_role') errorMessage = 'Tu usuario no tiene ningún comercio (tenant) asignado. Contacta al administrador.'
+
   return (
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background decoration */}
@@ -12,6 +22,12 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold text-white mb-2">Bienvenido</h1>
           <p className="text-neutral-400">Ingresa a tu panel de control</p>
         </div>
+
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm text-center font-medium">
+            {errorMessage}
+          </div>
+        )}
 
         <form className="space-y-6">
           <div>
