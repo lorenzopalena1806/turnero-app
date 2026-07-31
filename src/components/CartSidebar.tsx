@@ -5,7 +5,7 @@ import { ShoppingBag, X, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 
 export default function CartSidebar({ whatsappNumber }: { whatsappNumber: string }) {
-  const { items, removeItem, total } = useCart()
+  const { items, removeItem, totalPrice } = useCart()
   const [isOpen, setIsOpen] = useState(false)
 
   if (items.length === 0) return null
@@ -15,7 +15,7 @@ export default function CartSidebar({ whatsappNumber }: { whatsappNumber: string
     items.forEach(item => {
       text += `- ${item.name} ($${item.price})\n`
     })
-    text += `\n*Total: $${total}*`
+    text += `\n*Total: $${totalPrice}*`
     
     const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`
     window.open(url, '_blank')
@@ -70,13 +70,13 @@ export default function CartSidebar({ whatsappNumber }: { whatsappNumber: string
         {/* Cart Items */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
           {items.map((item, index) => (
-            <div key={index} className="flex justify-between items-center bg-white/[0.03] border border-white/5 p-4 rounded-2xl group hover:bg-white/[0.05] transition-colors">
+            <div key={item.id} className="flex justify-between items-center bg-white/[0.03] border border-white/5 p-4 rounded-2xl group hover:bg-white/[0.05] transition-colors">
               <div>
                 <p className="font-semibold text-white">{item.name}</p>
                 <p className="text-indigo-400 font-bold mt-0.5">${item.price}</p>
               </div>
               <button 
-                onClick={() => removeItem(index)}
+                onClick={() => removeItem(item.id)}
                 className="text-slate-500 hover:text-red-400 p-2 hover:bg-red-500/10 rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
               >
                 <X className="w-5 h-5" />
@@ -89,7 +89,7 @@ export default function CartSidebar({ whatsappNumber }: { whatsappNumber: string
         <div className="p-6 border-t border-white/10 bg-white/[0.02]">
           <div className="flex justify-between items-center mb-6">
             <span className="text-slate-400 font-medium">Total a pagar</span>
-            <span className="text-3xl font-extrabold text-white">${total}</span>
+            <span className="text-3xl font-extrabold text-white">${totalPrice}</span>
           </div>
           
           <button 
