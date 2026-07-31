@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { createTenant } from '@/app/(super-admin)/admin/actions'
-import { Plus, X, Building2 } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 
 type ActionState = {
   error?: string;
@@ -19,76 +19,71 @@ export default function CreateTenantForm() {
     return (
       <button 
         onClick={() => setIsOpen(true)}
-        className="bg-[#0F9D58] hover:bg-[#0d8a4d] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 shadow-sm"
+        className="bg-white text-[#2563eb] hover:bg-gray-50 font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-300"
       >
-        <Plus className="w-4 h-4" />
+        <Plus className="w-5 h-5" />
         Nuevo Comercio
       </button>
     )
   }
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans animate-in fade-in">
-      <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
         
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-blue-600" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-800 tracking-tight">Aprovisionar Local</h2>
-          </div>
+        <div className="p-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+          <h2 className="text-xl font-bold text-gray-800 m-0">Aprovisionar Local</h2>
           <button 
             onClick={() => setIsOpen(false)} 
-            className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-xl transition-colors"
+            className="text-gray-500 hover:text-gray-700 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto custom-scrollbar">
+        <div className="p-6 overflow-y-auto custom-scrollbar text-left">
           {state?.error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-medium">
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
               {state.error}
             </div>
           )}
           {state?.success && (
-            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-700 text-sm font-medium">
+            <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm">
               {state.success}
             </div>
           )}
 
           <form action={formAction} className="space-y-6">
-            <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-100">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Credenciales del Propietario</h3>
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-gray-800 border-b pb-1">1. Credenciales del Propietario</h3>
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">Correo Electrónico</label>
-                <input name="email" type="email" required className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/50 transition-all placeholder-slate-400" placeholder="dueño@ejemplo.com" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                <input name="email" type="email" required className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-[#2563eb] transition-colors" placeholder="dueño@ejemplo.com" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">Contraseña Inicial</label>
-                <input name="password" type="text" required minLength={6} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/50 transition-all placeholder-slate-400" placeholder="Mínimo 6 caracteres" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña Inicial</label>
+                <input name="password" type="text" required minLength={6} className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-[#2563eb] transition-colors" placeholder="Mínimo 6 caracteres" />
               </div>
             </div>
             
-            <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-100">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Datos del Local</h3>
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-gray-800 border-b pb-1">2. Datos del Local</h3>
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">Nombre Comercial</label>
-                <input name="name" type="text" required className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/50 transition-all placeholder-slate-400" placeholder="Peluquería VIP" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Comercial</label>
+                <input name="name" type="text" required className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-[#2563eb] transition-colors" placeholder="Peluquería VIP" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">Subdominio (URL)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subdominio (URL)</label>
                 <div className="flex items-center">
-                  <span className="bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl px-3 py-2.5 text-sm text-slate-500 font-bold">
+                  <span className="bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg px-3 py-2 text-gray-500 font-bold">
                     /
                   </span>
-                  <input name="slug" type="text" required placeholder="peluqueria-vip" className="w-full bg-white border border-slate-200 rounded-r-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/50 transition-all placeholder-slate-400" />
+                  <input name="slug" type="text" required placeholder="peluqueria-vip" className="w-full bg-white border border-gray-300 rounded-r-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-[#2563eb] transition-colors" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">WhatsApp de Contacto</label>
-                <input name="whatsapp" type="text" required placeholder="Ej: 54911223344" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/50 transition-all placeholder-slate-400" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp de Contacto</label>
+                <input name="whatsapp" type="text" required placeholder="Ej: 54911223344" className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-[#2563eb] transition-colors" />
               </div>
             </div>
 
@@ -96,26 +91,16 @@ export default function CreateTenantForm() {
               <button 
                 type="button" 
                 onClick={() => setIsOpen(false)}
-                className="flex-1 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl transition-colors text-sm font-semibold"
+                className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors font-medium"
               >
                 Cancelar
               </button>
               <button 
                 type="submit" 
                 disabled={isPending}
-                className="flex-1 py-3 bg-[#0F9D58] hover:bg-[#0d8a4d] disabled:opacity-50 text-white rounded-xl shadow-sm transition-colors text-sm font-semibold flex justify-center items-center gap-2"
+                className="flex-1 py-2.5 bg-[#2563eb] hover:bg-[#1e40af] disabled:opacity-50 text-white rounded-lg transition-colors font-medium flex justify-center items-center gap-2"
               >
-                {isPending ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Creando...
-                  </>
-                ) : (
-                  'Aprovisionar'
-                )}
+                {isPending ? 'Creando...' : 'Crear Local'}
               </button>
             </div>
           </form>

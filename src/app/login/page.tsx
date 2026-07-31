@@ -1,5 +1,5 @@
 import { login } from './actions'
-import { Store } from 'lucide-react'
+import { LogIn } from 'lucide-react'
 
 export default async function LoginPage({
   searchParams,
@@ -13,47 +13,41 @@ export default async function LoginPage({
   else if (error === 'no_role') errorMessage = 'Tu usuario no tiene ningún comercio (tenant) asignado. Contacta al administrador.'
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-[#f9f9f9] flex flex-col items-center justify-center p-4">
       
-      <div className="w-full max-w-md">
-        <div className="bg-white px-8 py-10 sm:px-12 sm:py-12 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center relative">
-          
-          {/* Logo/Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="w-14 h-14 bg-[#0F9D58] rounded-xl flex items-center justify-center shadow-lg shadow-emerald-600/20">
-              <span className="text-2xl font-extrabold text-white">T</span>
-            </div>
+      <div className="w-full max-w-[400px]">
+        {/* Header simple */}
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-[#2563eb] rounded-full flex items-center justify-center mx-auto mb-4 text-white shadow-md">
+            <LogIn className="w-8 h-8" />
           </div>
+          <h1 className="text-2xl font-bold text-gray-800">Acceso al Sistema</h1>
+          <p className="text-gray-500 text-sm mt-1">Ingresa tus credenciales para continuar</p>
+        </div>
 
-          <div className="mb-8">
-            <h1 className="text-[1.75rem] font-bold text-slate-800 mb-2">Iniciar Sesión Central</h1>
-            <p className="text-[0.95rem] text-slate-500 leading-relaxed">
-              Acceso unificado para SuperAdmin, Dueño de Local y Empleados
-            </p>
-          </div>
-
+        {/* Card */}
+        <div className="bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,0.1)] p-6 sm:p-8">
           {errorMessage && (
-            <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
+            <div className="mb-6 p-3 bg-red-50 text-red-600 rounded-md text-sm border border-red-100">
               {errorMessage}
             </div>
           )}
 
-          <form className="space-y-5 text-left">
+          <form className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2" htmlFor="email">
-                Email de Usuario
+              <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="email">
+                Correo Electrónico
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className="w-full bg-[#E8F0FE]/60 border-none rounded-xl px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/50 transition-all text-sm font-medium"
-                placeholder="usuario@gmail.com"
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent transition-shadow text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2" htmlFor="password">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="password">
                 Contraseña
               </label>
               <input
@@ -61,16 +55,15 @@ export default async function LoginPage({
                 name="password"
                 type="password"
                 required
-                className="w-full bg-[#E8F0FE]/60 border-none rounded-xl px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/50 transition-all text-sm font-medium"
-                placeholder="••••••••"
+                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent transition-shadow text-sm"
               />
             </div>
             
             <button
               formAction={login}
-              className="w-full mt-2 bg-[#0F9D58] hover:bg-[#0d8a4d] text-white font-semibold py-3.5 px-4 rounded-xl shadow-md shadow-emerald-600/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full mt-2 bg-[#2563eb] hover:bg-[#1e40af] text-white rounded-lg py-3 px-4 transition-colors duration-300 font-medium"
             >
-              Ingresar al Sistema
+              Iniciar Sesión
             </button>
           </form>
         </div>

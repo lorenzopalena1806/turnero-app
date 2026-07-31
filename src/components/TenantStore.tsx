@@ -1,66 +1,57 @@
 'use client'
 
 import { useCart } from './CartProvider'
-import { Plus } from 'lucide-react'
 
 export default function TenantStore({ tenant, services }: { tenant: any, services: any[] }) {
   const { addItem } = useCart()
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] font-sans pb-32">
+    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-32">
 
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center border border-emerald-100">
-              <span className="text-xl font-bold text-[#0F9D58]">{tenant.name.charAt(0)}</span>
-            </div>
-            <div>
-              <h1 className="font-bold text-slate-800 leading-none">{tenant.name}</h1>
-              <span className="text-[11px] text-slate-500 font-medium">Reservas Online</span>
-            </div>
-          </div>
+      {/* Header Fijo */}
+      <header className="sticky top-0 z-40 bg-[#2563eb] text-white shadow-md">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-4">
+          <h1 className="text-xl font-bold m-0">{tenant.name}</h1>
+          <p className="text-sm opacity-80 m-0">Reservas Online</p>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <main className="max-w-[1200px] mx-auto px-4 md:px-8 pt-8">
         
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-1">Catálogo de Servicios</h2>
-          <p className="text-slate-500">Selecciona los servicios que deseas reservar.</p>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">Nuestros Servicios</h2>
+          <p className="text-gray-500 text-sm mt-1">Selecciona los servicios que deseas reservar.</p>
         </div>
 
-        {/* Services Grid */}
-        {services.length === 0 ? (
-          <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl shadow-sm">
-            <p className="text-slate-500 font-medium">Próximamente agregaremos nuestros servicios.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service) => (
+        {/* CSS Grid para Servicios */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6">
+          {services.length === 0 ? (
+            <div className="col-span-full text-center py-12 bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,0.1)]">
+              <p className="text-gray-500">Próximamente agregaremos nuestros servicios.</p>
+            </div>
+          ) : (
+            services.map((service) => (
               <div 
                 key={service.id} 
-                className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col h-full justify-between gap-6 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,0.1)] p-5 transition-transform duration-200 ease-in-out hover:scale-[1.02] flex flex-col justify-between gap-4"
               >
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800 mb-1">{service.name}</h3>
-                  <p className="text-2xl font-black text-[#0F9D58]">
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">{service.name}</h3>
+                  <p className="text-2xl font-bold text-[#2563eb]">
                     ${service.price}
                   </p>
                 </div>
                 
                 <button
                   onClick={() => addItem(service)}
-                  className="w-full py-3 bg-[#E8F0FE]/60 hover:bg-[#0F9D58] text-[#0F9D58] hover:text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors border border-transparent"
+                  className="w-full py-2.5 bg-[#2563eb] hover:bg-[#1e40af] text-white rounded-lg font-medium transition-colors duration-300"
                 >
-                  <Plus className="w-4 h-4" />
-                  Agregar al turno
+                  Agregar
                 </button>
               </div>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </div>
       </main>
     </div>
   )

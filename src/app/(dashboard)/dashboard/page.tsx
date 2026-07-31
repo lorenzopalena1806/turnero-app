@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { Search, Plus, Trash2, Scissors } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -50,109 +50,79 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      
-      {/* Search Bar matching screenshot */}
-      <div className="bg-white rounded-xl border border-slate-200 p-2 flex items-center shadow-sm">
-        <div className="px-4 text-slate-400">
-          <Search className="w-5 h-5 text-blue-500" />
-        </div>
-        <input 
-          type="text" 
-          placeholder="Buscar servicio por nombre..." 
-          className="flex-1 border-none focus:outline-none focus:ring-0 text-slate-700 py-2 placeholder-slate-400"
-        />
-        <div className="px-2">
-          <button className="bg-[#1C2C40] hover:bg-slate-800 text-white px-6 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors">
-            Actualizar Tablero
-          </button>
+    <div>
+      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Catálogo de Servicios</h2>
+          <p className="text-gray-500 text-sm mt-1">Administra los servicios de tu comercio.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex flex-col lg:flex-row gap-8">
         
-        {/* Column 1: Add Service */}
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col h-[calc(100vh-220px)]">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-              <h3 className="font-bold text-slate-800">Nuevo Servicio</h3>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex-1">
+        {/* Left Column: Formulario */}
+        <div className="w-full lg:w-1/3">
+          <div className="bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,0.1)] p-6 sticky top-24">
+            <h3 className="font-bold text-gray-800 mb-4 border-b pb-2">Nuevo Servicio</h3>
             <form action={addService} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">Nombre del Servicio</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Servicio</label>
                 <input 
                   type="text" 
                   name="name" 
                   required 
-                  placeholder="Ej. Corte Clásico"
-                  className="w-full bg-[#E8F0FE]/60 border-none rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/50 transition-all text-sm font-medium"
+                  placeholder="Ej. Corte de Cabello"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-[#2563eb]"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">Precio ($)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
                 <input 
                   type="number" 
                   name="price" 
                   step="0.01" 
                   required 
                   placeholder="1500.00"
-                  className="w-full bg-[#E8F0FE]/60 border-none rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/50 transition-all text-sm font-medium"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:border-[#2563eb]"
                 />
               </div>
               <button 
                 type="submit"
-                className="w-full mt-2 bg-[#0F9D58] hover:bg-[#0d8a4d] text-white font-semibold py-3 px-4 rounded-xl shadow-sm transition-all flex justify-center items-center gap-2"
+                className="w-full mt-2 bg-[#2563eb] hover:bg-[#1e40af] text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-300"
               >
-                <Plus className="w-4 h-4" />
                 Guardar Servicio
               </button>
             </form>
           </div>
         </div>
 
-        {/* Column 2 & 3: Services List */}
-        <div className="lg:col-span-2 bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col h-[calc(100vh-220px)]">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-              <h3 className="font-bold text-slate-800">Catálogo Activo</h3>
-            </div>
-            <span className="bg-slate-200 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">
-              {services?.length || 0}
-            </span>
-          </div>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
+        {/* Right Column: Grid de Servicios */}
+        <div className="w-full lg:w-2/3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
             {services?.length === 0 ? (
-              <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
-                <p className="text-slate-500 font-medium">Aún no tienes servicios en tu catálogo.</p>
+              <div className="col-span-full p-8 text-center bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,0.1)]">
+                <p className="text-gray-500">Aún no hay servicios en tu catálogo.</p>
               </div>
             ) : (
-              services?.map(service => (
-                <div key={service.id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm hover:shadow-md transition-shadow group flex items-center justify-between">
+              services?.map((service) => (
+                <div 
+                  key={service.id} 
+                  className="bg-white rounded-lg shadow-[0_2px_6px_rgba(0,0,0,0.1)] p-5 transition-transform duration-200 ease-in-out hover:scale-[1.02] flex flex-col justify-between"
+                >
                   <div>
-                    <h4 className="font-bold text-slate-800 text-lg">{service.name}</h4>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                        <Scissors className="w-3 h-3" />
-                        Servicio
-                      </span>
-                    </div>
+                    <h4 className="font-bold text-gray-800 text-lg mb-2">{service.name}</h4>
+                    <p className="text-[#2563eb] font-bold text-xl">${service.price}</p>
                   </div>
-                  <div className="text-right flex flex-col items-end gap-3">
-                    <span className="font-bold text-emerald-600 text-xl">${service.price}</span>
+                  
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
                     <form action={deleteService}>
                       <input type="hidden" name="id" value={service.id} />
                       <button 
                         type="submit"
-                        className="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                        className="text-gray-400 hover:text-red-600 transition-colors"
                         title="Eliminar"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </form>
                   </div>
