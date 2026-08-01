@@ -44,7 +44,8 @@ export default function HistoryTable({
   staffList: Staff[]
 }) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [timeFilter, setTimeFilter] = useState('all') // all, today, week, month
+  const [timeFilter, setTimeFilter] = useState('all') // all, today, week, month, specific
+  const [specificDate, setSpecificDate] = useState('')
   const [staffFilter, setStaffFilter] = useState('all') // all, or staff_id
 
   const filteredAppointments = useMemo(() => {
@@ -68,11 +69,16 @@ export default function HistoryTable({
         if (timeFilter === 'today' && !isSameDay(appDate, today)) return false
         if (timeFilter === 'week' && !isSameWeek(appDate, today, { weekStartsOn: 1 })) return false
         if (timeFilter === 'month' && !isSameMonth(appDate, today)) return false
+        if (timeFilter === 'specific' && specificDate) {
+          // Compare YYYY-MM-DD
+          const appDateString = format(appDate, 'yyyy-MM-dd')
+          if (appDateString !== specificDate) return false
+        }
       }
 
       return true
     })
-  }, [appointments, searchTerm, timeFilter, staffFilter])
+  }, [appointments, searchTerm, timeFilter, staffFilter, specificDate])
 
   return (
     <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2.5rem] shadow-xl shadow-indigo-900/5 overflow-hidden">
@@ -81,7 +87,7 @@ export default function HistoryTable({
       <div className="p-6 border-b border-indigo-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h3 className="font-black text-indigo-950 text-xl whitespace-nowrap">Registro Histórico</h3>
         
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full md:w-auto">
           {/* Staff Filter */}
           <select 
             value={staffFilter}
@@ -95,16 +101,28 @@ export default function HistoryTable({
           </select>
 
           {/* Time Filter */}
-          <select 
-            value={timeFilter}
-            onChange={(e) => setTimeFilter(e.target.value)}
-            className="bg-indigo-50/50 border border-indigo-100 rounded-xl px-4 py-2 text-sm font-bold text-indigo-950 outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto"
-          >
-            <option value="all">Todas las fechas</option>
-            <option value="today">Hoy</option>
-            <option value="week">Esta semana</option>
-            <option value="month">Este mes</option>
-          </select>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <select 
+              value={timeFilter}
+              onChange={(e) => setTimeFilter(e.target.value)}
+              className="bg-indigo-50/50 border border-indigo-100 rounded-xl px-4 py-2 text-sm font-bold text-indigo-950 outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto"
+            >
+              <option value="all">Todas las fechas</option>
+              <option value="today">Hoy</option>
+              <option value="week">Esta semana</option>
+              <option value="month">Este mes</option>
+              <option value="specific">Día específico...</option>
+            </select>
+            
+            {timeFilter === 'specific' && (
+              <input 
+                type="date"
+                value={specificDate}
+                onChange={(e) => setSpecificDate(e.target.value)}
+                className="bg-indigo-50/50 border border-indigo-100 rounded-xl px-4 py-2 text-sm font-bold text-indigo-950 outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto"
+              />
+            )}
+          </div>
 
           {/* Search Bar */}
           <div className="bg-indigo-50/50 flex items-center px-4 py-2 rounded-xl border border-indigo-100 w-full sm:w-64 focus-within:ring-2 focus-within:ring-purple-500">
