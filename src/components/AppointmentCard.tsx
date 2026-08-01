@@ -18,8 +18,17 @@ export default function AppointmentCard({ appointment }: { appointment: any }) {
     })
   }
 
-  const startTime = parseISO(appointment.start_time)
-  const endTime = parseISO(appointment.end_time)
+  // El servidor guarda la hora local como si fuera UTC.
+  // Para evitar que el navegador del cliente lo convierta a su zona horaria (restándole 3 horas),
+  // extraemos directamente la porción de la hora del string ISO (ej: "2026-08-01T09:30:00Z" -> "09:30")
+  const formatTimeStr = (isoString: string) => {
+    if (!isoString) return ''
+    const timePart = isoString.split('T')[1]
+    return timePart ? timePart.substring(0, 5) : ''
+  }
+
+  const startTimeStr = formatTimeStr(appointment.start_time)
+  const endTimeStr = formatTimeStr(appointment.end_time)
 
   const statusColors: Record<string, string> = {
     pending: 'bg-amber-100 text-amber-700 border-amber-200',
@@ -49,7 +58,7 @@ export default function AppointmentCard({ appointment }: { appointment: any }) {
 
       <div className="flex items-center gap-2 text-indigo-900/70 font-bold mb-4 bg-indigo-50/50 w-fit px-3 py-1.5 rounded-xl border border-indigo-100">
         <Clock className="w-4 h-4 text-purple-500" />
-        {format(startTime, 'HH:mm')} - {format(endTime, 'HH:mm')}
+        {startTimeStr} - {endTimeStr}
       </div>
 
       <div className="space-y-2 mb-6">
