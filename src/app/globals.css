@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc; /* slate-50 */
-  --foreground: #0f172a; /* slate-900 */
+  --background: #fdf2f8; /* Pink-50 as fallback */
+  --foreground: #312e81; /* Indigo-900 */
 }
 
 body {
@@ -11,4 +11,5 @@ body {
   font-family: 'Inter', 'Roboto', sans-serif;
   margin: 0;
   padding: 0;
+  min-height: 100vh;
 }

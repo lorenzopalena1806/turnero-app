@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { createTenant } from '@/app/(super-admin)/admin/actions'
-import { Plus, X, Building2 } from 'lucide-react'
+import { Plus, X, Rocket } from 'lucide-react'
 
 type ActionState = {
   error?: string;
@@ -19,93 +19,82 @@ export default function CreateTenantForm() {
     return (
       <button 
         onClick={() => setIsOpen(true)}
-        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl shadow-md shadow-emerald-600/20 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
+        className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black py-3 px-6 rounded-2xl shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 hover:-translate-y-1 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2"
       >
-        <Plus className="w-4 h-4" />
-        <span className="text-sm">Nuevo Comercio</span>
+        <Plus className="w-5 h-5" />
+        <span>Nuevo Comercio</span>
       </button>
     )
   }
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-200 animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed inset-0 bg-indigo-950/40 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-white relative">
         
-        <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <div className="flex items-center gap-3">
-             <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">
-                <Building2 className="w-4 h-4" />
+        {/* Glow */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+
+        <div className="p-6 border-b border-indigo-50/50 flex justify-between items-center relative z-10">
+          <div className="flex items-center gap-4">
+             <div className="w-12 h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                <Rocket className="w-6 h-6" />
              </div>
-             <h2 className="text-lg font-extrabold text-slate-900 m-0">Aprovisionar Local</h2>
+             <h2 className="text-2xl font-black text-indigo-950 m-0">Nuevo Local</h2>
           </div>
           <button 
             onClick={() => setIsOpen(false)} 
-            className="text-slate-400 hover:text-slate-600 bg-white hover:bg-slate-100 p-1.5 rounded-lg border border-slate-200 transition-all active:scale-95"
+            className="text-indigo-900/50 hover:text-rose-500 bg-indigo-50/50 hover:bg-rose-50 p-2 rounded-2xl transition-all active:scale-95"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto custom-scrollbar text-left bg-slate-50/30">
+        <div className="p-8 overflow-y-auto custom-scrollbar text-left relative z-10">
           {state?.error && (
-            <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-sm font-medium">
+            <div className="mb-6 p-4 bg-rose-100/80 border border-rose-200 rounded-2xl text-rose-700 text-sm font-bold backdrop-blur-sm">
               {state.error}
             </div>
           )}
           {state?.success && (
-            <div className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-700 text-sm font-medium">
+            <div className="mb-6 p-4 bg-emerald-100/80 border border-emerald-200 rounded-2xl text-emerald-700 text-sm font-bold backdrop-blur-sm">
               {state.success}
             </div>
           )}
 
           <form action={formAction} className="space-y-6">
             <div className="space-y-4">
-              <h3 className="text-[10px] uppercase font-bold tracking-wider text-slate-500 border-b border-slate-200 pb-2">1. Credenciales del Propietario</h3>
+              <h3 className="text-[10px] uppercase font-bold tracking-widest text-indigo-900/50">1. Acceso del Propietario</h3>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Correo Electrónico</label>
-                <input name="email" type="email" required className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium text-sm" placeholder="dueño@ejemplo.com" />
+                <input name="email" type="email" required className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-3.5 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all font-bold text-sm" placeholder="Correo Electrónico" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Contraseña Inicial</label>
-                <input name="password" type="text" required minLength={6} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium text-sm" placeholder="Mínimo 6 caracteres" />
+                <input name="password" type="text" required minLength={6} className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-3.5 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all font-bold text-sm" placeholder="Contraseña (Min 6)" />
               </div>
             </div>
             
-            <div className="space-y-4">
-              <h3 className="text-[10px] uppercase font-bold tracking-wider text-slate-500 border-b border-slate-200 pb-2">2. Datos del Local</h3>
+            <div className="space-y-4 pt-2">
+              <h3 className="text-[10px] uppercase font-bold tracking-widest text-indigo-900/50">2. Detalles Comerciales</h3>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Nombre Comercial</label>
-                <input name="name" type="text" required className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium text-sm" placeholder="Peluquería VIP" />
+                <input name="name" type="text" required className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-3.5 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all font-bold text-sm" placeholder="Nombre Comercial" />
+              </div>
+              <div className="flex items-center">
+                <span className="bg-indigo-100/50 border-2 border-r-0 border-indigo-100/50 rounded-l-2xl px-5 py-3.5 text-sm text-indigo-900/50 font-bold">
+                  /
+                </span>
+                <input name="slug" type="text" required placeholder="url-tienda" className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-r-2xl px-5 py-3.5 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all font-bold text-sm" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Subdominio (URL)</label>
-                <div className="flex items-center">
-                  <span className="bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl px-4 py-2.5 text-sm text-slate-500 font-bold">
-                    /
-                  </span>
-                  <input name="slug" type="text" required placeholder="peluqueria-vip" className="w-full bg-white border border-slate-200 rounded-r-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium text-sm" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">WhatsApp de Contacto</label>
-                <input name="whatsapp" type="text" required placeholder="Ej: 54911223344" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium text-sm" />
+                <input name="whatsapp" type="text" required placeholder="WhatsApp de Contacto" className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-3.5 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all font-bold text-sm" />
               </div>
             </div>
 
-            <div className="pt-4 flex gap-3">
-              <button 
-                type="button" 
-                onClick={() => setIsOpen(false)}
-                className="flex-1 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl font-bold transition-all active:scale-95 text-sm"
-              >
-                Cancelar
-              </button>
+            <div className="pt-6">
               <button 
                 type="submit" 
                 disabled={isPending}
-                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl shadow-md shadow-emerald-600/20 font-bold hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-sm flex justify-center items-center gap-2"
+                className="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 disabled:opacity-50 text-white rounded-2xl shadow-xl shadow-pink-500/25 font-black hover:-translate-y-1 active:scale-95 transition-all duration-300 text-sm flex justify-center items-center gap-2"
               >
-                {isPending ? 'Creando...' : 'Crear Local'}
+                {isPending ? 'Procesando...' : 'Aprovisionar Tienda'}
               </button>
             </div>
           </form>

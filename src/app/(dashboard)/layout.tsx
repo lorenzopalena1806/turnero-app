@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, ExternalLink, Settings, ClipboardList, Store } from 'lucide-react'
+import { LogOut, ExternalLink, ClipboardList, Settings } from 'lucide-react'
 
 export default async function DashboardLayout({
   children,
@@ -22,38 +22,38 @@ export default async function DashboardLayout({
   if (!tenant) redirect('/login?error=no_role')
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-indigo-950 font-sans flex flex-col relative overflow-hidden">
       
+      {/* Background Glows */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-indigo-100/50 to-transparent pointer-events-none"></div>
+
       {/* Top Navbar */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <header className="bg-white/70 backdrop-blur-xl border-b border-white/50 sticky top-0 z-50 shadow-sm shadow-indigo-900/5">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center border border-slate-200 shadow-sm">
-              <span className="text-xl font-extrabold text-emerald-600">{tenant.name.charAt(0)}</span>
+            <div className="w-12 h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <span className="text-xl font-black text-white">{tenant.name.charAt(0)}</span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="font-extrabold text-slate-900 leading-none">{tenant.name}</h2>
-                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Activo</span>
+                <h2 className="font-black text-indigo-950 text-xl leading-none">{tenant.name}</h2>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium mt-1">Panel de Control</p>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-indigo-900/50 mt-1">Panel de Control</p>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-3">
-              <a 
-                href={`/${tenant.slug}`} 
-                target="_blank"
-                className="text-sm font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 flex items-center gap-2 transition-all hover:-translate-y-0.5 active:scale-95 shadow-sm"
-              >
-                Tienda Pública <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
-            <div className="h-6 w-px bg-slate-200 mx-2"></div>
+            <a 
+              href={`/${tenant.slug}`} 
+              target="_blank"
+              className="hidden sm:flex text-sm font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-5 py-2.5 rounded-xl transition-all hover:-translate-y-0.5 active:scale-95 items-center gap-2"
+            >
+              Tienda Pública <ExternalLink className="w-4 h-4" />
+            </a>
+            <div className="h-6 w-px bg-indigo-900/10 mx-2 hidden sm:block"></div>
             <form action="/auth/signout" method="post">
-              <button className="flex items-center gap-2 text-slate-500 hover:text-rose-600 font-bold text-sm bg-white hover:bg-rose-50 px-3 py-2 rounded-xl border border-transparent hover:border-rose-100 transition-all active:scale-95">
-                <LogOut className="w-4 h-4" />
+              <button className="flex items-center gap-2 text-indigo-900/40 hover:text-rose-500 font-bold text-sm hover:bg-rose-50 px-3 py-2.5 rounded-xl transition-all active:scale-95">
+                <LogOut className="w-5 h-5" />
                 <span className="hidden sm:block">Salir</span>
               </button>
             </form>
@@ -61,23 +61,23 @@ export default async function DashboardLayout({
         </div>
         
         {/* Tabs Bar */}
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex items-center gap-8 overflow-x-auto hide-scrollbar">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-8 overflow-x-auto hide-scrollbar">
           <Link 
             href="/dashboard" 
-            className="flex items-center gap-2 py-3 border-b-2 border-emerald-600 text-emerald-600 font-bold text-sm whitespace-nowrap transition-colors"
+            className="flex items-center gap-2 py-4 border-b-[3px] border-purple-500 text-purple-600 font-black text-sm whitespace-nowrap"
           >
             <ClipboardList className="w-4 h-4" />
-            Catálogo de Servicios
+            Catálogo
           </Link>
-          <button className="flex items-center gap-2 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-bold text-sm whitespace-nowrap transition-colors">
-            <Store className="w-4 h-4 text-slate-400" />
-            Configuración del Local
+          <button className="flex items-center gap-2 py-4 border-b-[3px] border-transparent text-indigo-900/40 hover:text-indigo-900/70 font-bold text-sm whitespace-nowrap transition-colors">
+            <Settings className="w-4 h-4" />
+            Configuración
           </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-[1400px] mx-auto w-full px-4 sm:px-6 py-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <main className="flex-1 max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
         {children}
       </main>
 
