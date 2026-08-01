@@ -1,7 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, ExternalLink, ClipboardList, Settings, Calendar, Users, BarChart3 } from 'lucide-react'
+import { LogOut, ExternalLink } from 'lucide-react'
+import DashboardNav from '@/components/DashboardNav'
 
 export default async function DashboardLayout({
   children,
@@ -61,43 +62,7 @@ export default async function DashboardLayout({
         </div>
         
         {/* Tabs Bar */}
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-8 overflow-x-auto hide-scrollbar">
-          <Link 
-            href="/dashboard" 
-            className="flex items-center gap-2 py-4 border-b-[3px] border-purple-500 text-purple-600 font-black text-sm whitespace-nowrap"
-          >
-            <ClipboardList className="w-4 h-4" />
-            Catálogo
-          </Link>
-          <Link 
-            href="/dashboard/agenda" 
-            className="flex items-center gap-2 py-4 border-b-[3px] border-transparent text-indigo-900/40 hover:text-indigo-900/70 font-bold text-sm whitespace-nowrap transition-colors"
-          >
-            <Calendar className="w-4 h-4" />
-            Agenda
-          </Link>
-          <Link 
-            href="/dashboard/staff" 
-            className="flex items-center gap-2 py-4 border-b-[3px] border-transparent text-indigo-900/40 hover:text-indigo-900/70 font-bold text-sm whitespace-nowrap transition-colors"
-          >
-            <Users className="w-4 h-4" />
-            Equipo
-          </Link>
-          <Link 
-            href="/dashboard/stats" 
-            className="flex items-center gap-2 py-4 border-b-[3px] border-transparent text-indigo-900/40 hover:text-indigo-900/70 font-bold text-sm whitespace-nowrap transition-colors"
-          >
-            <BarChart3 className="w-4 h-4" />
-            Estadísticas
-          </Link>
-          <Link 
-            href="/dashboard/settings" 
-            className="flex items-center gap-2 py-4 border-b-[3px] border-transparent text-indigo-900/40 hover:text-indigo-900/70 font-bold text-sm whitespace-nowrap transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            Configuración
-          </Link>
-        </div>
+        <DashboardNav />
       </header>
 
       {/* Main Content */}
