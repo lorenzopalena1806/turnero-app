@@ -62,10 +62,7 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
   const themeColor = tenant.theme_color || '#8b5cf6'
 
   return (
-    <div 
-      className="min-h-screen font-sans pb-32" 
-      style={{ backgroundColor: `${themeColor}10` }}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 font-sans pb-32">
       {/* Header Fijo */}
       <header className="bg-white/70 backdrop-blur-xl border-b border-white/50 sticky top-0 z-40 shadow-sm">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
