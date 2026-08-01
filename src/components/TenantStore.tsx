@@ -60,6 +60,7 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
   }
 
   const themeColor = tenant.theme_color || '#8b5cf6'
+  const serviceLabel = tenant.service_label || 'Servicio'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 font-sans pb-32">
@@ -95,14 +96,14 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
 
         <div className="mb-10 text-center sm:text-left">
           <h2 className="text-4xl font-black text-slate-900 mb-2">Nuestro Catálogo</h2>
-          <p className="text-sm font-bold text-slate-500">Selecciona los servicios que deseas reservar.</p>
+          <p className="text-sm font-bold text-slate-500">Selecciona los {serviceLabel.toLowerCase()}s que deseas reservar.</p>
         </div>
 
         {/* CSS Grid para Servicios */}
         <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
           {services.length === 0 ? (
             <div className="col-span-full text-center py-24 bg-white/60 backdrop-blur-md border border-white rounded-[2.5rem] shadow-xl">
-              <p className="text-sm font-bold text-slate-500">Próximamente agregaremos nuestros servicios.</p>
+              <p className="text-sm font-bold text-slate-500">Próximamente agregaremos nuestros {serviceLabel.toLowerCase()}s.</p>
             </div>
           ) : (
             services.map((service) => (
@@ -145,7 +146,7 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
               <X className="w-6 h-6" />
             </button>
             <h3 className="text-2xl font-black text-slate-900 mb-2">{selectedService.name}</h3>
-            <p className="text-slate-500 font-bold text-sm mb-6">Selecciona los adicionales que desees sumar a tu servicio.</p>
+            <p className="text-slate-500 font-bold text-sm mb-6">Selecciona los adicionales que desees sumar a tu {serviceLabel.toLowerCase()}.</p>
             
             <div className="space-y-3 mb-8">
               {selectedService.variants.map((v: any, idx: number) => {
