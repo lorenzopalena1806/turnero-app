@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import BusinessHoursForm from '@/components/BusinessHoursForm'
+import TenantSettingsForm from '@/components/TenantSettingsForm'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -25,6 +26,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <TenantSettingsForm tenant={tenant} />
       <BusinessHoursForm tenantId={tenant.id} initialHours={hours || []} />
     </div>
   )

@@ -9,7 +9,7 @@ import { getAvailableSlots, createBooking } from '@/app/[tenant_slug]/booking-ac
 
 type CheckoutStep = 'CART' | 'STAFF' | 'DATE' | 'TIME' | 'INFO'
 
-export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staff, themeColor }: { tenantId: string, tenantName: string, whatsappNumber: string, staff: any[], themeColor: string }) {
+export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staff, themeColor, staffLabel }: { tenantId: string, tenantName: string, whatsappNumber: string, staff: any[], themeColor: string, staffLabel: string }) {
   const { items, isOpen, setIsOpen, removeItem, clearCart } = useCart()
   const [step, setStep] = useState<CheckoutStep>('CART')
   
@@ -132,7 +132,7 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
           <div>
             <h2 className="font-black text-slate-900 text-xl flex items-center gap-2">
               {step === 'CART' && 'Tu Reserva'}
-              {step === 'STAFF' && 'Elige Profesional'}
+              {step === 'STAFF' && `Elige ${staffLabel}`}
               {step === 'DATE' && 'Elige Fecha'}
               {step === 'TIME' && 'Elige Horario'}
               {step === 'INFO' && 'Tus Datos'}
@@ -192,7 +192,7 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
                       onClick={() => setStep('STAFF')}
                       className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
                     >
-                      Elegir Profesional <ArrowRight className="w-5 h-5" />
+                      Elegir {staffLabel} <ArrowRight className="w-5 h-5" />
                     </button>
                   </div>
                 </>
@@ -204,7 +204,7 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               {staff.length === 0 ? (
                 <div className="text-center py-10">
-                  <p className="font-bold text-slate-500">No hay profesionales disponibles.</p>
+                  <p className="font-bold text-slate-500">No hay {staffLabel.toLowerCase()}s disponibles.</p>
                 </div>
               ) : (
                 staff.map(member => (

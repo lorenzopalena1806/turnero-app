@@ -6,7 +6,7 @@ import { Plus, Trash2, Clock, Save, ChevronDown, ChevronUp } from 'lucide-react'
 
 const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
-export default function StaffManager({ tenantId, staff, schedules }: { tenantId: string, staff: any[], schedules: any[] }) {
+export default function StaffManager({ tenantId, staff, schedules, staffLabel }: { tenantId: string, staff: any[], schedules: any[], staffLabel: string }) {
   const [isPending, startTransition] = useTransition()
   const [newStaffName, setNewStaffName] = useState('')
   const [expandedStaff, setExpandedStaff] = useState<string | null>(null)
@@ -24,7 +24,7 @@ export default function StaffManager({ tenantId, staff, schedules }: { tenantId:
   }
 
   const handleDeleteStaff = (id: string) => {
-    if (!confirm('¿Seguro que deseas eliminar este miembro del equipo?')) return
+    if (!confirm(`¿Seguro que deseas eliminar este ${staffLabel.toLowerCase()}?`)) return
     startTransition(async () => {
       await deleteStaffAction(id)
     })
@@ -87,7 +87,7 @@ export default function StaffManager({ tenantId, staff, schedules }: { tenantId:
       {/* Agregar Staff */}
       <form onSubmit={handleAddStaff} className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-6 shadow-xl shadow-indigo-900/5 flex gap-4 items-end">
         <div className="flex-1">
-          <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Nuevo Miembro del Equipo</label>
+          <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Nuevo {staffLabel}</label>
           <input 
             type="text" 
             placeholder="Ej: Marcos"

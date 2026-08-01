@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { Trash2, Scissors } from 'lucide-react'
+import { Trash2, Star } from 'lucide-react'
 import AddServiceForm from '@/components/AddServiceForm'
 import EditServiceModal from '@/components/EditServiceModal'
 import { deleteServiceAction } from './actions'
@@ -24,6 +24,8 @@ export default async function DashboardPage() {
     .select('*')
     .eq('tenant_id', tenant.id)
     .order('created_at', { ascending: false })
+
+  const serviceLabel = tenant.service_label || 'Servicio'
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
@@ -57,7 +59,7 @@ export default async function DashboardPage() {
                   <h4 className="font-black text-indigo-950 text-xl leading-tight">{service.name}</h4>
                   <div className="mt-2">
                     <span className="text-[10px] uppercase font-bold tracking-widest text-purple-500/70 bg-purple-50 px-2 py-1 rounded-md inline-flex items-center gap-1">
-                      <Scissors className="w-3 h-3" /> Servicio
+                      <Star className="w-3 h-3" /> {serviceLabel}
                     </span>
                   </div>
                 </div>

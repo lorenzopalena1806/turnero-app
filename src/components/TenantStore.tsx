@@ -190,6 +190,7 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
         whatsappNumber={tenant.whatsapp_number} 
         staff={staff}
         themeColor={themeColor}
+        staffLabel={tenant.staff_label || 'Profesional'}
       />
     </div>
   )

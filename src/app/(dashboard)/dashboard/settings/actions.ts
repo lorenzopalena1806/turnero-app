@@ -48,3 +48,29 @@ export async function saveBusinessHours(tenantId: string, hours: BusinessHourInp
   revalidatePath('/dashboard/settings')
   return { success: true }
 }
+
+export async function updateTenantSettingsAction(tenantId: string, data: any) {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data: tenant } = await supabase
+    .from('tenants')
+    .select('id')
+    .eq('id', tenantId)
+    .eq('owner_id', user.id)
+    .single()
+
+  if (!tenant) throw new Error('Not authorized')
+
+  const { error } = await supabase
+    .from('tenants')
+    .update(data)
+    .eq('id', tenantId)
+
+  if (error) throw error
+
+  revalidatePath('/dashboard/settings')
+  revalidatePath('/[tenant_slug]', 'page')
+}
