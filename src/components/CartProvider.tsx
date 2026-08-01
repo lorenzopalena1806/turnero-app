@@ -28,7 +28,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Persistence could be added here using localStorage if needed, 
   // but transient in-memory state is fine for this flow.
 
-  const addItem = (newItem: CartItem) => {
+  const addItem = (newItem: any) => {
     setItems((currentItems) => {
       const existing = currentItems.find(item => item.id === newItem.id)
       if (existing) {
@@ -36,7 +36,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           item.id === newItem.id ? { ...item, quantity: item.quantity + 1 } : item
         )
       }
-      return [...currentItems, newItem]
+      // Ensure quantity is set to 1 for new items, and duration is mapped correctly
+      return [...currentItems, { 
+        ...newItem, 
+        quantity: 1,
+        duration: newItem.duration_minutes || 30 // fallback if null
+      }]
     })
   }
 
