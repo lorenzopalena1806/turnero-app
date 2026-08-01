@@ -1,5 +1,6 @@
 import { login } from './actions'
 import { Sparkles } from 'lucide-react'
+import PasswordInput from '@/components/PasswordInput'
 
 export default async function LoginPage({
   searchParams,
@@ -59,14 +60,7 @@ export default async function LoginPage({
               <label className="block text-xs font-bold text-indigo-900/70 uppercase tracking-widest mb-2 ml-1" htmlFor="password">
                 Contraseña
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="w-full bg-white/50 border-2 border-indigo-100 rounded-2xl px-5 py-3.5 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all font-bold text-sm"
-                placeholder="••••••••"
-              />
+              <PasswordInput />
             </div>
             
             <button
