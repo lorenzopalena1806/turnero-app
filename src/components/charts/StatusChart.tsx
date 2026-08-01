@@ -54,12 +54,12 @@ export default function StatusChart({ completed, cancelled }: { completed: numbe
             content={(props) => {
               const { payload } = props;
               return (
-                <ul className="flex justify-center gap-6 mt-4">
+                <ul className="flex flex-col justify-center gap-2 mt-4 ml-6">
                   {payload?.map((entry, index) => (
                     <li key={`item-${index}`} className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></div>
-                      <span className="text-sm font-bold text-indigo-950">{entry.value}</span>
-                      <span className="text-xs font-bold text-indigo-900/50 uppercase">{entry.value === 'Asistencias' ? 'Asistencias' : 'Cancelaciones'}</span>
+                      <span className="text-sm font-black text-indigo-950">{entry.payload.value}</span>
+                      <span className="text-xs font-bold text-indigo-900/50 uppercase">{entry.value}</span>
                     </li>
                   ))}
                 </ul>
