@@ -266,7 +266,7 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="bg-slate-900 text-white p-4 rounded-2xl mb-6 flex items-center gap-3">
                 <Calendar className="w-5 h-5 text-purple-400" />
-                <span className="font-bold">{selectedDate ? format(selectedDate, 'EEEE d de MMMM', { locale: es }) : ''}</span>
+                <span className="font-bold">{selectedDate ? format(selectedDate, "EEEE d 'de' MMMM", { locale: es }) : ''}</span>
               </div>
               
               {availableSlots.length === 0 ? (
