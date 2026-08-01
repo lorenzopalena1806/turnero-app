@@ -2,7 +2,7 @@
 
 import { updateAppointmentStatus } from '@/app/(dashboard)/dashboard/agenda/actions'
 import { useState, useTransition } from 'react'
-import { Check, X, Clock } from 'lucide-react'
+import { Check, X, Clock, MessageCircle } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { User } from 'lucide-react'
 
@@ -50,7 +50,20 @@ export default function AppointmentCard({ appointment }: { appointment: any }) {
       <div className="flex justify-between items-start mb-4">
         <div>
           <h4 className="font-black text-indigo-950 text-xl">{appointment.customer_name}</h4>
-          <p className="text-indigo-900/50 font-bold text-sm">{appointment.customer_phone}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-indigo-900/50 font-bold text-sm">{appointment.customer_phone}</p>
+            {appointment.customer_phone && (
+              <a 
+                href={`https://wa.me/${appointment.customer_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${appointment.customer_name}, te escribimos para confirmar tu turno hoy a las ${startTimeStr}. ¿Nos confirmas tu asistencia?`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-500 hover:text-emerald-600 bg-emerald-50 hover:bg-emerald-100 p-1.5 rounded-lg transition-colors"
+                title="Confirmar asistencia por WhatsApp"
+              >
+                <MessageCircle className="w-4 h-4" />
+              </a>
+            )}
+          </div>
         </div>
         <span className={`text-xs uppercase font-black tracking-widest px-3 py-1 rounded-lg border ${statusColors[status] || statusColors.pending}`}>
           {statusLabels[status] || status}
