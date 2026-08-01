@@ -50,7 +50,7 @@ export default async function AgendaPage({
       </div>
 
       {/* Date Selector */}
-      <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar mb-8">
+      <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar mb-8 scroll-smooth">
         {dateTabs.map((d, i) => {
           const isSelected = isSameDay(d, selectedDate)
           const isToday = isSameDay(d, today)
@@ -59,6 +59,7 @@ export default async function AgendaPage({
           return (
             <a 
               key={i}
+              id={isSelected ? 'selected-date' : undefined}
               href={`/dashboard/agenda?date=${dateStr}`}
               className={`flex-shrink-0 flex flex-col items-center justify-center w-20 h-24 rounded-2xl border-2 transition-all ${
                 isSelected 
@@ -74,6 +75,7 @@ export default async function AgendaPage({
           )
         })}
       </div>
+      <script dangerouslySetInnerHTML={{ __html: `setTimeout(() => document.getElementById('selected-date')?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }), 50);` }} />
 
       {/* Appointments Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
