@@ -67,6 +67,18 @@ export default function AddServiceForm({ tenantId }: { tenantId: string }) {
             className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all font-bold text-sm"
           />
         </div>
+        <div>
+          <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Duración (minutos)</label>
+          <input 
+            type="number" 
+            name="duration_minutes" 
+            step="5"
+            min="5" 
+            required 
+            placeholder="30"
+            className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all font-bold text-sm"
+          />
+        </div>
         <button 
           type="submit"
           disabled={isPending}

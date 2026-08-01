@@ -6,9 +6,10 @@ import { revalidatePath } from 'next/cache'
 export async function addServiceAction(formData: FormData) {
   const name = formData.get('name') as string
   const price = parseFloat(formData.get('price') as string)
+  const durationMinutes = parseInt(formData.get('duration_minutes') as string, 10)
   const tenantId = formData.get('tenant_id') as string
 
-  if (!name || isNaN(price) || !tenantId) {
+  if (!name || isNaN(price) || isNaN(durationMinutes) || !tenantId) {
     return { error: 'Datos inválidos.' }
   }
 
@@ -21,6 +22,7 @@ export async function addServiceAction(formData: FormData) {
     tenant_id: tenantId,
     name,
     price,
+    duration_minutes: durationMinutes,
   })
 
   if (error) {
