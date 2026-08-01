@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Trash2, Scissors } from 'lucide-react'
 import AddServiceForm from '@/components/AddServiceForm'
+import EditServiceModal from '@/components/EditServiceModal'
 import { deleteServiceAction } from './actions'
 
 export default async function DashboardPage() {
@@ -63,20 +64,23 @@ export default async function DashboardPage() {
                 
                 <div className="flex items-center justify-between border-t border-indigo-50 pt-4 mt-auto">
                   <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 text-2xl">${service.price}</span>
-                  <form action={async (formData) => {
-                    'use server'
-                    await deleteServiceAction(formData)
-                  }}>
-                    <input type="hidden" name="id" value={service.id} />
-                    <input type="hidden" name="tenant_id" value={tenant.id} />
-                    <button 
-                      type="submit"
-                      className="text-indigo-900/30 hover:text-rose-500 hover:bg-rose-50 p-2.5 rounded-xl transition-all active:scale-95"
-                      title="Eliminar"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </form>
+                  <div className="flex items-center gap-1">
+                    <EditServiceModal service={service} tenantId={tenant.id} />
+                    <form action={async (formData) => {
+                      'use server'
+                      await deleteServiceAction(formData)
+                    }}>
+                      <input type="hidden" name="id" value={service.id} />
+                      <input type="hidden" name="tenant_id" value={tenant.id} />
+                      <button 
+                        type="submit"
+                        className="text-indigo-900/30 hover:text-rose-500 hover:bg-rose-50 p-2.5 rounded-xl transition-all active:scale-95"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             ))
