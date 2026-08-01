@@ -63,7 +63,10 @@ export default async function DashboardPage() {
                 
                 <div className="flex items-center justify-between border-t border-indigo-50 pt-4 mt-auto">
                   <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 text-2xl">${service.price}</span>
-                  <form action={deleteServiceAction}>
+                  <form action={async (formData) => {
+                    'use server'
+                    await deleteServiceAction(formData)
+                  }}>
                     <input type="hidden" name="id" value={service.id} />
                     <input type="hidden" name="tenant_id" value={tenant.id} />
                     <button 
