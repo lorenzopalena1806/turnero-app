@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ClipboardList, Calendar, Users, BarChart3, Settings } from 'lucide-react'
+import { ClipboardList, Calendar, Users, BarChart3, Settings, History } from 'lucide-react'
 
 export default function DashboardNav() {
   const pathname = usePathname()
@@ -10,6 +10,7 @@ export default function DashboardNav() {
   const tabs = [
     { name: 'Catálogo', href: '/dashboard', icon: ClipboardList, exact: true },
     { name: 'Agenda', href: '/dashboard/agenda', icon: Calendar },
+    { name: 'Historial', href: '/dashboard/history', icon: History },
     { name: 'Equipo', href: '/dashboard/staff', icon: Users },
     { name: 'Estadísticas', href: '/dashboard/stats', icon: BarChart3 },
     { name: 'Configuración', href: '/dashboard/settings', icon: Settings },
