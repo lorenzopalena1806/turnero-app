@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import AppointmentCard from '@/components/AppointmentCard'
 import { format, parseISO, startOfDay, addDays, isSameDay } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 export default async function AgendaPage({
   searchParams,
@@ -66,7 +67,7 @@ export default async function AgendaPage({
               }`}
             >
               <span className={`text-[10px] uppercase font-black tracking-widest ${isSelected ? 'text-white/70' : 'text-indigo-900/40'}`}>
-                {isToday ? 'Hoy' : format(d, 'EEE')}
+                {isToday ? 'Hoy' : format(d, 'EEE', { locale: es })}
               </span>
               <span className="text-2xl font-black mt-1">{format(d, 'dd')}</span>
             </a>
