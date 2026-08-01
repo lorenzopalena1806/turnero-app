@@ -45,8 +45,12 @@ export default function AppointmentCard({ appointment }: { appointment: any }) {
     cancelled: 'Cancelado'
   }
 
+  if (status === 'completed' || status === 'cancelled') {
+    return null
+  }
+
   return (
-    <div className={`bg-white/90 backdrop-blur-xl border-2 rounded-[2rem] p-6 shadow-xl shadow-indigo-900/5 transition-all ${status === 'cancelled' ? 'opacity-50 border-white' : 'border-indigo-50 hover:-translate-y-1'}`}>
+    <div className="bg-white/90 backdrop-blur-xl border-2 rounded-[2rem] p-6 shadow-xl shadow-indigo-900/5 transition-all border-indigo-50 hover:-translate-y-1">
       <div className="flex justify-between items-start mb-4">
         <div>
           <h4 className="font-black text-indigo-950 text-xl">{appointment.customer_name}</h4>
