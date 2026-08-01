@@ -50,7 +50,7 @@ export default async function HistoryPage() {
         <p className="text-indigo-900/50 font-bold mt-1">Historial completo de todas las reservas y clientes.</p>
       </div>
 
-      <HistoryTable appointments={safeAppointments} staffList={safeStaffList} />
+      <HistoryTable appointments={safeAppointments as any} staffList={safeStaffList} />
     </div>
   )
 }
