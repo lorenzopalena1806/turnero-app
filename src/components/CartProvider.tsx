@@ -18,12 +18,15 @@ type CartContextType = {
   clearCart: () => void
   totalPrice: number
   totalItems: number
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
+  const [isOpen, setIsOpen] = useState(false)
   
   // Persistence could be added here using localStorage if needed, 
   // but transient in-memory state is fine for this flow.
@@ -43,6 +46,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         duration: newItem.duration_minutes || 30 // fallback if null
       }]
     })
+    setIsOpen(true)
   }
 
   const removeItem = (id: string) => {
@@ -67,7 +71,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0)
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, totalPrice, totalItems }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, totalPrice, totalItems, isOpen, setIsOpen }}>
       {children}
     </CartContext.Provider>
   )

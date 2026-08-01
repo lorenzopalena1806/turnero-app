@@ -1,213 +1,278 @@
 'use client'
 
 import { useCart } from './CartProvider'
-import { ShoppingBag, X, Calendar, Clock, User, CheckCircle2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useTransition } from 'react'
+import { X, Calendar, Clock, User, Trash2, ArrowRight } from 'lucide-react'
+import { addDays, format, isSameDay } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { getAvailableSlots, createBooking } from '@/app/[tenant_slug]/booking-actions'
-import { format, addDays } from 'date-fns'
 
-type Props = {
-  tenantId: string
-  tenantName: string
-  whatsappNumber: string
-}
+type CheckoutStep = 'CART' | 'STAFF' | 'DATE' | 'TIME' | 'INFO'
 
-export default function CartSidebar({ tenantId, tenantName, whatsappNumber }: Props) {
-  const { items, removeItem, totalPrice, clearCart } = useCart()
-  const [isOpen, setIsOpen] = useState(false)
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1) // 1: Cart, 2: Date, 3: Time, 4: Info
-
-  const [selectedDate, setSelectedDate] = useState<string>('')
+export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staff, themeColor }: { tenantId: string, tenantName: string, whatsappNumber: string, staff: any[], themeColor: string }) {
+  const { items, isOpen, setIsOpen, removeItem, clearCart } = useCart()
+  const [step, setStep] = useState<CheckoutStep>('CART')
+  
+  const [selectedStaff, setSelectedStaff] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
-  const [selectedTime, setSelectedTime] = useState<string>('')
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
-
+  const [isPending, startTransition] = useTransition()
+  
   const [customerName, setCustomerName] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
   const totalDuration = items.reduce((acc, item) => acc + (item.duration || 30), 0)
+  const totalPrice = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
 
   if (items.length === 0 && !isOpen) return null
 
-  const handleDateSelect = async (date: string) => {
-    setSelectedDate(date)
-    setSelectedTime('')
-    setIsLoadingSlots(true)
-    const slots = await getAvailableSlots(tenantId, date, totalDuration)
-    setAvailableSlots(slots)
-    setIsLoadingSlots(false)
-    setStep(3)
-  }
-
-  const handleCheckout = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  const resetFlow = () => {
+    setStep('CART')
+    setSelectedStaff(null)
+    setSelectedDate(null)
+    setSelectedTime(null)
     setError('')
-
-    const result = await createBooking({
-      tenantId,
-      customerName,
-      customerPhone,
-      date: selectedDate,
-      time: selectedTime,
-      totalDuration,
-      totalPrice,
-      services: items
-    })
-
-    if (result.error) {
-      setError(result.error)
-      setIsSubmitting(false)
-      return
-    }
-
-    // Success! Prepare WhatsApp message
-    let text = `Hola *${tenantName}*! Acabo de reservar un turno a través de la web.\n\n`
-    text += `*Cliente:* ${customerName}\n`
-    text += `*Día:* ${selectedDate}\n`
-    text += `*Hora:* ${selectedTime}\n\n`
-    text += `*Servicios:*\n`
-    items.forEach(item => {
-      text += `- ${item.name} ($${item.price})\n`
-    })
-    text += `\n*Total a pagar: $${totalPrice}*`
-    
-    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`
-    window.open(url, '_blank')
-    
-    clearCart()
-    setIsOpen(false)
-    setStep(1)
-    setIsSubmitting(false)
   }
 
-  // Generate next 14 days for selection
-  const days = Array.from({ length: 14 }).map((_, i) => {
-    const d = addDays(new Date(), i)
-    return {
-      date: format(d, 'yyyy-MM-dd'),
-      display: format(d, 'dd/MM')
-    }
-  })
+  const handleClose = () => {
+    setIsOpen(false)
+    if (items.length === 0) resetFlow()
+  }
+
+  const handleStaffSelect = (staffId: string) => {
+    setSelectedStaff(staffId)
+    setStep('DATE')
+  }
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date)
+    const dateString = format(date, 'yyyy-MM-dd')
+    
+    startTransition(async () => {
+      if (!selectedStaff) return
+      const slots = await getAvailableSlots(tenantId, dateString, totalDuration, selectedStaff)
+      setAvailableSlots(slots)
+      setStep('TIME')
+    })
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedDate || !selectedTime || !selectedStaff) return
+
+    startTransition(async () => {
+      const result = await createBooking({
+        tenantId,
+        staffId: selectedStaff,
+        customerName,
+        customerPhone,
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        time: selectedTime,
+        totalPrice,
+        totalDuration,
+        services: items
+      })
+
+      if (result.error) {
+        setError(result.error)
+      } else {
+        // Enviar a WhatsApp
+        const staffName = staff.find(s => s.id === selectedStaff)?.name
+        const dateStr = format(selectedDate, 'dd/MM/yyyy')
+        let msg = `Hola! Soy ${customerName}. Quiero reservar un turno en ${tenantName} con ${staffName}:\n\n`
+        items.forEach(item => {
+          msg += `- ${item.name} ($${item.price})\n`
+        })
+        msg += `\n📅 Fecha: ${dateStr}\n🕒 Hora: ${selectedTime}\n💰 Total: $${totalPrice}\n\nMi teléfono es: ${customerPhone}`
+        
+        window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank')
+        
+        clearCart()
+        setIsOpen(false)
+        resetFlow()
+      }
+    })
+  }
+
+  // Generate next 14 days
+  const days = Array.from({ length: 14 }).map((_, i) => addDays(new Date(), i))
 
   return (
     <>
-      <button 
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white p-5 rounded-2xl shadow-xl shadow-pink-500/40 flex items-center justify-center transition-all hover:-translate-y-2 active:scale-95 z-40"
-      >
-        <div className="relative">
-          <ShoppingBag className="w-7 h-7" />
-          <span className="absolute -top-4 -right-4 bg-indigo-950 text-white text-[12px] font-black w-7 h-7 flex items-center justify-center rounded-xl border-2 border-white shadow-sm">
-            {items.length}
-          </span>
-        </div>
-      </button>
-
+      {/* Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-indigo-950/40 backdrop-blur-md z-50 transition-all duration-500" 
-          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 transition-opacity"
+          onClick={handleClose}
         />
       )}
 
+      {/* Sidebar */}
       <div 
-        className={`fixed top-0 right-0 h-full w-full sm:w-[460px] bg-white/90 backdrop-blur-2xl sm:border-l border-white z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col shadow-[0_0_40px_rgba(49,46,129,0.2)] ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white shadow-2xl z-50 transform transition-transform duration-500 ease-out flex flex-col border-l border-slate-100 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full blur-[80px] opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-
-        <div className="p-8 border-b border-indigo-50/50 flex items-center justify-between relative z-10 bg-white/50">
-          <div className="flex items-center gap-4">
-            {step === 1 ? (
-              <div className="w-12 h-12 bg-gradient-to-tr from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/20 text-white">
-                <ShoppingBag className="w-6 h-6" />
-              </div>
-            ) : (
+        {/* Header */}
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-10">
+          <div>
+            <h2 className="font-black text-slate-900 text-xl flex items-center gap-2">
+              {step === 'CART' && 'Tu Reserva'}
+              {step === 'STAFF' && 'Elige Profesional'}
+              {step === 'DATE' && 'Elige Fecha'}
+              {step === 'TIME' && 'Elige Horario'}
+              {step === 'INFO' && 'Tus Datos'}
+            </h2>
+            {step !== 'CART' && (
               <button 
-                onClick={() => setStep(prev => (prev - 1) as any)}
-                className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 hover:bg-indigo-100 transition-colors font-black"
+                onClick={() => setStep(step === 'INFO' ? 'TIME' : step === 'TIME' ? 'DATE' : step === 'DATE' ? 'STAFF' : 'CART')}
+                className="text-xs font-bold text-slate-500 hover:text-slate-900 mt-1 uppercase tracking-widest"
               >
-                ←
+                ← Volver
               </button>
             )}
-            <h2 className="text-2xl font-black text-indigo-950 tracking-tight">
-              {step === 1 && 'Tu Reserva'}
-              {step === 2 && 'Elige un Día'}
-              {step === 3 && 'Elige la Hora'}
-              {step === 4 && 'Tus Datos'}
-            </h2>
           </div>
           <button 
-            onClick={() => setIsOpen(false)}
-            className="p-2.5 text-indigo-900/40 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all active:scale-95"
+            onClick={handleClose}
+            className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8 space-y-5 custom-scrollbar relative z-10">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
           
-          {step === 1 && (
-            <>
+          {step === 'CART' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               {items.length === 0 ? (
-                <div className="text-center text-indigo-900/50 font-bold py-10">Tu carrito está vacío.</div>
+                <div className="text-center py-20 opacity-50">
+                  <p className="font-bold text-slate-900">No hay servicios seleccionados.</p>
+                </div>
               ) : (
-                items.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center bg-white/80 border border-white p-5 rounded-2xl shadow-lg shadow-indigo-900/5 transition-all hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 group">
-                    <div>
-                      <p className="font-black text-indigo-950 text-lg mb-1">{item.name}</p>
-                      <p className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 font-black text-xl leading-none">${item.price}</p>
-                      <p className="text-xs font-bold text-indigo-900/40 mt-1">{item.duration || 30} min</p>
+                <>
+                  <div className="space-y-4">
+                    {items.map(item => (
+                      <div key={item.id} className="bg-white border-2 border-slate-100 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                        <div>
+                          <p className="font-black text-slate-900 text-lg mb-1">{item.name}</p>
+                          <p className="font-black text-xl leading-none" style={{ color: themeColor }}>${item.price}</p>
+                          <p className="text-xs font-bold text-slate-400 mt-1">{item.duration || 30} min</p>
+                        </div>
+                        <button 
+                          onClick={() => removeItem(item.id)}
+                          className="p-3 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="bg-slate-900 text-white rounded-[2rem] p-6 shadow-xl mt-8">
+                    <div className="flex justify-between items-center mb-6">
+                      <span className="font-bold text-slate-400">Total</span>
+                      <span className="font-black text-3xl">${totalPrice}</span>
                     </div>
                     <button 
-                      onClick={() => removeItem(item.id)}
-                      className="text-indigo-900/30 hover:text-rose-600 p-3 hover:bg-rose-50 rounded-xl transition-all active:scale-95"
+                      onClick={() => setStep('STAFF')}
+                      className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
                     >
-                      <X className="w-5 h-5" />
+                      Elegir Profesional <ArrowRight className="w-5 h-5" />
                     </button>
                   </div>
-                ))
+                </>
               )}
-            </>
-          )}
-
-          {step === 2 && (
-            <div className="grid grid-cols-2 gap-3">
-              {days.map(day => (
-                <button
-                  key={day.date}
-                  onClick={() => handleDateSelect(day.date)}
-                  className="bg-white border-2 border-indigo-50 hover:border-purple-300 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 shadow-sm hover:shadow-md"
-                >
-                  <Calendar className="w-6 h-6 text-purple-500" />
-                  <span className="font-black text-indigo-950">{day.display}</span>
-                </button>
-              ))}
             </div>
           )}
 
-          {step === 3 && (
-            <div>
-              {isLoadingSlots ? (
-                <div className="text-center py-10 font-bold text-indigo-900/50 animate-pulse">Buscando horarios...</div>
-              ) : availableSlots.length === 0 ? (
-                <div className="text-center py-10 font-bold text-rose-500 bg-rose-50 rounded-2xl">
-                  No hay horarios disponibles para este día. Por favor elige otro.
+          {step === 'STAFF' && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+              {staff.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="font-bold text-slate-500">No hay profesionales disponibles.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-3">
+                staff.map(member => (
+                  <button
+                    key={member.id}
+                    onClick={() => handleStaffSelect(member.id)}
+                    className="w-full bg-white border-2 border-slate-100 hover:border-purple-200 rounded-2xl p-4 flex items-center justify-between group transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 font-black">
+                        {member.name.charAt(0)}
+                      </div>
+                      <span className="font-black text-slate-900 text-lg group-hover:text-purple-600 transition-colors">{member.name}</span>
+                    </div>
+                    <User className="w-5 h-5 text-slate-300 group-hover:text-purple-500 transition-colors" />
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+
+          {step === 'DATE' && (
+            <div className="space-y-3 animate-in fade-in slide-in-from-right-4 duration-300">
+              {days.map(d => {
+                const isSelected = selectedDate && isSameDay(selectedDate, d)
+                return (
+                  <button
+                    key={d.toISOString()}
+                    onClick={() => handleDateSelect(d)}
+                    className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
+                      isSelected 
+                        ? 'bg-purple-50 border-purple-500' 
+                        : 'bg-white border-slate-100 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${
+                        isSelected ? 'bg-purple-500 text-white' : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {format(d, 'd')}
+                      </div>
+                      <div className="text-left">
+                        <p className={`font-black uppercase text-sm ${isSelected ? 'text-purple-900' : 'text-slate-900'}`}>
+                          {format(d, 'EEEE', { locale: es })}
+                        </p>
+                        <p className={`font-bold text-xs ${isSelected ? 'text-purple-600' : 'text-slate-400'}`}>
+                          {format(d, 'MMMM', { locale: es })}
+                        </p>
+                      </div>
+                    </div>
+                    {isSelected && isPending && <div className="w-5 h-5 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
+          {step === 'TIME' && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="bg-slate-900 text-white p-4 rounded-2xl mb-6 flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-purple-400" />
+                <span className="font-bold">{selectedDate ? format(selectedDate, 'EEEE d de MMMM', { locale: es }) : ''}</span>
+              </div>
+              
+              {availableSlots.length === 0 ? (
+                <div className="text-center py-20 bg-white border-2 border-slate-100 rounded-3xl">
+                  <Clock className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                  <p className="font-bold text-slate-500">No hay horarios disponibles<br/>para este día.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
                   {availableSlots.map(time => (
                     <button
                       key={time}
                       onClick={() => {
                         setSelectedTime(time)
-                        setStep(4)
+                        setStep('INFO')
                       }}
-                      className="bg-white border-2 border-indigo-50 hover:border-purple-300 py-3 rounded-2xl flex flex-col items-center justify-center transition-all hover:-translate-y-1 shadow-sm font-black text-indigo-950"
+                      className="bg-white border-2 border-slate-100 hover:border-purple-400 hover:bg-purple-50 p-4 rounded-2xl font-black text-slate-700 hover:text-purple-700 transition-all text-lg shadow-sm"
                     >
                       {time}
                     </button>
@@ -217,81 +282,65 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber }: Pr
             </div>
           )}
 
-          {step === 4 && (
-            <form id="checkout-form" onSubmit={handleCheckout} className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Nombre Completo</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
-                  <input 
-                    type="text" 
-                    required 
-                    value={customerName}
-                    onChange={e => setCustomerName(e.target.value)}
-                    className="w-full bg-white border-2 border-indigo-100 rounded-2xl pl-12 pr-5 py-4 text-indigo-950 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 font-bold text-sm"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">WhatsApp</label>
-                <input 
-                  type="text" 
-                  required 
-                  placeholder="+54 9 11 1234 5678"
-                  value={customerPhone}
-                  onChange={e => setCustomerPhone(e.target.value)}
-                  className="w-full bg-white border-2 border-indigo-100 rounded-2xl px-5 py-4 text-indigo-950 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 font-bold text-sm"
-                />
-              </div>
-
+          {step === 'INFO' && (
+            <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              
               {error && (
-                <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl font-bold text-sm border border-rose-100">
+                <div className="p-4 bg-rose-50 text-rose-600 font-bold text-sm rounded-2xl border border-rose-200">
                   {error}
                 </div>
               )}
 
-              <div className="bg-indigo-50 rounded-2xl p-5 mt-6 border border-indigo-100/50">
-                <h4 className="font-black text-indigo-950 mb-3 text-sm">Resumen de tu Turno</h4>
-                <div className="flex items-center gap-2 text-sm font-bold text-indigo-900/70 mb-1">
-                  <Calendar className="w-4 h-4" /> {selectedDate}
+              <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-sm space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Tu Nombre Completo</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={customerName}
+                    onChange={e => setCustomerName(e.target.value)}
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-slate-900 placeholder-slate-300 focus:outline-none focus:border-purple-400 font-bold text-sm"
+                  />
                 </div>
-                <div className="flex items-center gap-2 text-sm font-bold text-indigo-900/70 mb-3">
-                  <Clock className="w-4 h-4" /> {selectedTime} ({totalDuration} min)
-                </div>
-                <div className="border-t border-indigo-100 pt-3 flex justify-between">
-                  <span className="font-black text-indigo-950">Total</span>
-                  <span className="font-black text-purple-600">${totalPrice}</span>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Tu WhatsApp</label>
+                  <input 
+                    type="tel" 
+                    required
+                    value={customerPhone}
+                    onChange={e => setCustomerPhone(e.target.value)}
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-slate-900 placeholder-slate-300 focus:outline-none focus:border-purple-400 font-bold text-sm"
+                  />
                 </div>
               </div>
+
+              <div className="bg-purple-50 p-6 rounded-3xl border-2 border-purple-100 text-purple-900 space-y-2">
+                <h4 className="font-black text-lg mb-4">Resumen</h4>
+                <div className="flex justify-between font-bold text-sm">
+                  <span className="text-purple-600">Fecha</span>
+                  <span>{selectedDate && format(selectedDate, 'dd/MM/yyyy')}</span>
+                </div>
+                <div className="flex justify-between font-bold text-sm">
+                  <span className="text-purple-600">Hora</span>
+                  <span>{selectedTime}</span>
+                </div>
+                <div className="flex justify-between font-bold text-sm pt-4 border-t border-purple-200/50">
+                  <span className="text-purple-600">Total a pagar</span>
+                  <span className="font-black text-xl">${totalPrice}</span>
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isPending}
+                className="w-full py-4 text-white rounded-2xl font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                style={{ backgroundColor: themeColor }}
+              >
+                {isPending ? 'Procesando...' : 'Confirmar Turno'}
+              </button>
             </form>
           )}
 
-        </div>
-
-        <div className="p-8 border-t border-indigo-50/50 bg-white/80 relative z-10">
-          {step === 1 && items.length > 0 && (
-            <button 
-              onClick={() => setStep(2)}
-              className="w-full py-5 px-4 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-black rounded-2xl shadow-xl shadow-purple-500/30 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3 text-lg"
-            >
-              Elegir Horario
-            </button>
-          )}
-          {step === 4 && (
-            <button 
-              type="submit"
-              form="checkout-form"
-              disabled={isSubmitting}
-              className="w-full py-5 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/30 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3 text-lg disabled:opacity-50"
-            >
-              {isSubmitting ? 'Confirmando...' : (
-                <>
-                  <CheckCircle2 className="w-6 h-6" />
-                  Confirmar Turno
-                </>
-              )}
-            </button>
-          )}
         </div>
       </div>
     </>

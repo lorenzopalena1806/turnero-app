@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, ExternalLink, ClipboardList, Settings, Calendar } from 'lucide-react'
+import { LogOut, ExternalLink, ClipboardList, Settings, Calendar, Users, BarChart3 } from 'lucide-react'
 
 export default async function DashboardLayout({
   children,
@@ -75,6 +75,20 @@ export default async function DashboardLayout({
           >
             <Calendar className="w-4 h-4" />
             Agenda
+          </Link>
+          <Link 
+            href="/dashboard/staff" 
+            className="flex items-center gap-2 py-4 border-b-[3px] border-transparent text-indigo-900/40 hover:text-indigo-900/70 font-bold text-sm whitespace-nowrap transition-colors"
+          >
+            <Users className="w-4 h-4" />
+            Equipo
+          </Link>
+          <Link 
+            href="/dashboard/stats" 
+            className="flex items-center gap-2 py-4 border-b-[3px] border-transparent text-indigo-900/40 hover:text-indigo-900/70 font-bold text-sm whitespace-nowrap transition-colors"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Estadísticas
           </Link>
           <Link 
             href="/dashboard/settings" 

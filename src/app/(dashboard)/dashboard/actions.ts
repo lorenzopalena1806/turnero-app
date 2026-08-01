@@ -3,11 +3,17 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function addServiceAction(formData: FormData) {
+export async function addServiceAction(prevState: any, formData: FormData) {
   const name = formData.get('name') as string
   const price = parseFloat(formData.get('price') as string)
   const durationMinutes = parseInt(formData.get('duration_minutes') as string, 10)
   const tenantId = formData.get('tenant_id') as string
+  
+  let variants = []
+  try {
+    const variantsRaw = formData.get('variants') as string
+    if (variantsRaw) variants = JSON.parse(variantsRaw)
+  } catch (e) {}
 
   if (!name || isNaN(price) || isNaN(durationMinutes) || !tenantId) {
     return { error: 'Datos inválidos.' }
@@ -23,6 +29,7 @@ export async function addServiceAction(formData: FormData) {
     name,
     price,
     duration_minutes: durationMinutes,
+    variants
   })
 
   if (error) {
