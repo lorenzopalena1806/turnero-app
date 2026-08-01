@@ -3,6 +3,8 @@
 import { useCart } from './CartProvider'
 import { Plus } from 'lucide-react'
 
+import CartSidebar from './CartSidebar'
+
 export default function TenantStore({ tenant, services }: { tenant: any, services: any[] }) {
   const { addItem } = useCart()
 
@@ -67,6 +69,11 @@ export default function TenantStore({ tenant, services }: { tenant: any, service
           )}
         </div>
       </main>
+      <CartSidebar 
+        tenantId={tenant.id} 
+        tenantName={tenant.name} 
+        whatsappNumber={tenant.whatsapp_number} 
+      />
     </div>
   )
 }
