@@ -69,10 +69,13 @@ export default async function DashboardLayout({
             <ClipboardList className="w-4 h-4" />
             Catálogo
           </Link>
-          <button className="flex items-center gap-2 py-4 border-b-[3px] border-transparent text-indigo-900/40 hover:text-indigo-900/70 font-bold text-sm whitespace-nowrap transition-colors">
+          <Link 
+            href="/dashboard/settings" 
+            className="flex items-center gap-2 py-4 border-b-[3px] border-transparent text-indigo-900/40 hover:text-indigo-900/70 font-bold text-sm whitespace-nowrap transition-colors"
+          >
             <Settings className="w-4 h-4" />
             Configuración
-          </button>
+          </Link>
         </div>
       </header>
 

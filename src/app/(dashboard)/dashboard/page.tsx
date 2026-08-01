@@ -27,14 +27,16 @@ export default async function DashboardPage() {
     'use server'
     const name = formData.get('name') as string
     const price = parseFloat(formData.get('price') as string)
+    const formTenantId = formData.get('tenant_id') as string
     
-    if (name && !isNaN(price)) {
+    if (name && !isNaN(price) && formTenantId) {
       const supabase = await createClient()
-      await supabase.from('services').insert({
-        tenant_id: tenant.id,
+      const { error } = await supabase.from('services').insert({
+        tenant_id: formTenantId,
         name,
         price,
       })
+      if (error) console.error('Error inserting service:', error)
       revalidatePath('/dashboard')
     }
   }
@@ -76,6 +78,7 @@ export default async function DashboardPage() {
                 placeholder="Ej. Corte Clásico"
                 className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/20 transition-all font-bold text-sm"
               />
+              <input type="hidden" name="tenant_id" value={tenant.id} />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Precio ($)</label>

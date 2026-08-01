@@ -2,10 +2,10 @@ import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import TenantStore from '@/components/TenantStore'
 
-export default async function TenantPage({ params }: { params: { tenant_slug: string } }) {
+export default async function TenantPage({ params }: { params: Promise<{ tenant_slug: string }> }) {
   const supabase = await createClient()
   
-  const { tenant_slug } = params
+  const { tenant_slug } = await params
 
   // Fetch the tenant
   const { data: tenant } = await supabase
