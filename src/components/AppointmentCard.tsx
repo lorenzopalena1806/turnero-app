@@ -4,6 +4,7 @@ import { updateAppointmentStatus } from '@/app/(dashboard)/dashboard/agenda/acti
 import { useState, useTransition } from 'react'
 import { Check, X, Clock } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
+import { User } from 'lucide-react'
 
 export default function AppointmentCard({ appointment }: { appointment: any }) {
   const [isPending, startTransition] = useTransition()
@@ -56,9 +57,17 @@ export default function AppointmentCard({ appointment }: { appointment: any }) {
         </span>
       </div>
 
-      <div className="flex items-center gap-2 text-indigo-900/70 font-bold mb-4 bg-indigo-50/50 w-fit px-3 py-1.5 rounded-xl border border-indigo-100">
-        <Clock className="w-4 h-4 text-purple-500" />
-        {startTimeStr} - {endTimeStr}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 text-indigo-900/70 font-bold bg-indigo-50/50 w-fit px-3 py-1.5 rounded-xl border border-indigo-100">
+          <Clock className="w-4 h-4 text-purple-500" />
+          {startTimeStr} - {endTimeStr}
+        </div>
+        {appointment.staff && (
+          <div className="flex items-center gap-2 text-indigo-900/70 font-bold bg-indigo-50/50 w-fit px-3 py-1.5 rounded-xl border border-indigo-100">
+            <User className="w-4 h-4 text-purple-500" />
+            {appointment.staff.name}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2 mb-6">

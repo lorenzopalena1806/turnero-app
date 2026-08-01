@@ -31,7 +31,7 @@ export default async function AgendaPage({
 
   const { data: appointments } = await supabase
     .from('appointments')
-    .select('*')
+    .select('*, staff(*)')
     .eq('tenant_id', tenant.id)
     .gte('start_time', start)
     .lt('start_time', end)
