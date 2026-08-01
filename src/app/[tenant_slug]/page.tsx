@@ -27,7 +27,7 @@ export default async function TenantPage({ params }: { params: Promise<{ tenant_
 
   const { data: staff } = await supabase
     .from('staff')
-    .select('*')
+    .select('*, staff_schedules(*)')
     .eq('tenant_id', tenant.id)
     .eq('is_active', true)
     .order('name', { ascending: true })

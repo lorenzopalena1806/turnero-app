@@ -98,7 +98,18 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
   }
 
   // Generate next 14 days
-  const days = Array.from({ length: 14 }).map((_, i) => addDays(new Date(), i))
+  const allDays = Array.from({ length: 14 }).map((_, i) => addDays(new Date(), i))
+  
+  // Filter by staff schedule
+  const selectedStaffMember = staff.find(s => s.id === selectedStaff)
+  const workingDaysOfWeek = selectedStaffMember?.staff_schedules
+    ?.filter((s: any) => s.is_working)
+    .map((s: any) => s.day_of_week)
+
+  const days = allDays.filter(d => {
+    if (!workingDaysOfWeek || workingDaysOfWeek.length === 0) return true
+    return workingDaysOfWeek.includes(d.getDay())
+  })
 
   return (
     <>
