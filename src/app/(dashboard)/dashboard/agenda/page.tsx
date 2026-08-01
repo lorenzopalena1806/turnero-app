@@ -38,9 +38,9 @@ export default async function AgendaPage({
     .lt('start_time', end)
     .order('start_time', { ascending: true })
 
-  // Generate date tabs: 7 days in the past + 30 days in the future
+  // Generate date tabs: today + 30 days in the future
   const today = new Date()
-  const dateTabs = Array.from({ length: 38 }).map((_, i) => addDays(today, i - 7))
+  const dateTabs = Array.from({ length: 30 }).map((_, i) => addDays(today, i))
 
   return (
     <div className="max-w-6xl mx-auto">
