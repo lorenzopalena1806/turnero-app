@@ -169,7 +169,7 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
               <h3 className="text-2xl font-black text-slate-900 mb-6">¿Dónde estamos?</h3>
               <div className="w-full h-48 rounded-xl overflow-hidden bg-slate-100">
                 <iframe 
-                  src={tenant.address_map_url} 
+                  src={tenant.address_map_url.match(/src="([^"]+)"/)?.[1] || tenant.address_map_url} 
                   width="100%" 
                   height="100%" 
                   style={{ border: 0 }} 
