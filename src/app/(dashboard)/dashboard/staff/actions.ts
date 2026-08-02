@@ -12,17 +12,18 @@ export async function addStaffAction(tenantId: string, name: string, email?: str
 
   let authUserId = null;
 
-  // Si se provee email y contraseña, creamos la cuenta usando un cliente anónimo
-  // para no cerrar la sesión actual del dueño.
+  // Si se provee email y contraseña, creamos la cuenta usando la Service Role Key (Admin)
+  // para crear la cuenta ya verificada y no cerrar la sesión del dueño.
   if (email && password) {
-    const anonSupabase = createJSClient(
+    const adminSupabase = createJSClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { auth: { persistSession: false } }
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
     )
-    const { data: authData, error: authError } = await anonSupabase.auth.signUp({
+    const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
       email,
-      password
+      password,
+      email_confirm: true
     })
     
     if (authError) return { error: `Error creando cuenta: ${authError.message}` }
