@@ -6,7 +6,7 @@ import { useState } from 'react'
 import CartSidebar from './CartSidebar'
 
 export default function TenantStore({ tenant, services, staff }: { tenant: any, services: any[], staff: any[] }) {
-  const { addItem } = useCart()
+  const { addItem, items, isOpen, setIsOpen } = useCart()
   const [selectedService, setSelectedService] = useState<any | null>(null)
   const [selectedVariants, setSelectedVariants] = useState<number[]>([])
 
@@ -230,6 +230,25 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
             </button>
           </div>
         </div>
+      )}
+
+      {/* Floating Cart Button */}
+      {items.length > 0 && !isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-8 right-8 z-40 text-white p-4 rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center gap-3 hover:scale-105 active:scale-95 transition-all"
+          style={{ backgroundColor: themeColor }}
+        >
+          <div className="relative">
+            <span className="absolute -top-3 -right-3 bg-rose-500 text-white text-[11px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-white shadow-md">
+              {items.length}
+            </span>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </div>
+          <span className="font-black pr-2 text-sm uppercase tracking-widest">Ver Reserva</span>
+        </button>
       )}
 
       <CartSidebar 
