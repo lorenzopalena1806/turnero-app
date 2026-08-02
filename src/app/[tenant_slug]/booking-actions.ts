@@ -132,3 +132,50 @@ export async function createBooking(data: {
   if (error) return { error: error.message }
   return { success: true }
 }
+
+export async function createMultipleBookings(bookings: Array<{
+  tenantId: string,
+  staffId: string,
+  customerName: string,
+  customerPhone: string,
+  date: string,
+  time: string,
+  totalPrice: number,
+  totalDuration: number,
+  services: any[]
+}>) {
+  const supabase = await createClient()
+
+  // 1. Check availability for ALL bookings first
+  for (const booking of bookings) {
+    const availableSlots = await getAvailableSlots(booking.tenantId, booking.date, booking.totalDuration, booking.staffId)
+    if (!availableSlots.includes(booking.time)) {
+      return { error: `El horario ${booking.time} para el servicio de ${booking.customerName} ya no está disponible.` }
+    }
+  }
+
+  // 2. Prepare payload for multiple insertions
+  const payload = bookings.map(b => {
+    const startDateTime = new Date(`${b.date}T${b.time}:00`)
+    const endDateTime = addMinutes(startDateTime, b.totalDuration)
+    return {
+      tenant_id: b.tenantId,
+      staff_id: b.staffId,
+      customer_name: b.customerName,
+      customer_phone: b.customerPhone,
+      start_time: startDateTime.toISOString(),
+      end_time: endDateTime.toISOString(),
+      status: 'pending',
+      total_price: b.totalPrice,
+      services: b.services
+    }
+  })
+
+  // 3. Insert all appointments
+  const { error } = await supabase
+    .from('appointments')
+    .insert(payload)
+
+  if (error) return { error: error.message }
+  return { success: true }
+}
