@@ -203,15 +203,7 @@ export default async function StatsPage({
 
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Peak Hours Chart */}
-        <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2.5rem] p-8 shadow-xl shadow-indigo-900/5">
-          <h3 className="font-black text-indigo-950 text-xl mb-6 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-amber-500" /> Mapa de Calor (Horas Pico)
-          </h3>
-          <PeakHoursChart data={peakHoursData} />
-        </div>
-
+      <div className="grid grid-cols-1 gap-6">
         {/* Staff Ranking */}
         <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2.5rem] p-8 shadow-xl shadow-indigo-900/5">
           <h3 className="font-black text-indigo-950 text-xl mb-6 flex items-center gap-2">
