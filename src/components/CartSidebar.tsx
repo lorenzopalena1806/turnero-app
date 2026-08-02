@@ -90,7 +90,31 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
     startTransition(async () => {
       const staffId = currentSelection.staffId
       if (!staffId) return
-      const slots = await getAvailableSlots(tenantId, dateString, currentSelection.duration, staffId)
+      let slots = await getAvailableSlots(tenantId, dateString, currentSelection.duration, staffId)
+      
+      // Filter out slots that conflict with other selections already made in this cart
+      const otherSelections = selections.filter((s, idx) => 
+        idx !== currentItemIndex && 
+        s.staffId === staffId && 
+        s.date && format(s.date, 'yyyy-MM-dd') === dateString && 
+        s.time
+      )
+
+      if (otherSelections.length > 0) {
+        slots = slots.filter(slot => {
+          const slotStart = new Date(`${dateString}T${slot}:00`)
+          const slotEnd = new Date(slotStart.getTime() + currentSelection.duration * 60000)
+
+          const isOverlapping = otherSelections.some(other => {
+            const otherStart = new Date(`${dateString}T${other.time}:00`)
+            const otherEnd = new Date(otherStart.getTime() + other.duration * 60000)
+            return (slotStart < otherEnd && slotEnd > otherStart)
+          })
+
+          return !isOverlapping
+        })
+      }
+
       setAvailableSlots(slots)
     })
   }
