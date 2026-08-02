@@ -3,19 +3,11 @@ import { redirect } from 'next/navigation'
 import BusinessHoursForm from '@/components/BusinessHoursForm'
 import TenantSettingsForm from '@/components/TenantSettingsForm'
 
+import { requireAdmin } from '@/utils/rbac'
+
 export default async function SettingsPage() {
+  const { tenant } = await requireAdmin()
   const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: tenant } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!tenant) redirect('/login?error=no_role')
 
   // Fetch existing business hours
   const { data: hours } = await supabase

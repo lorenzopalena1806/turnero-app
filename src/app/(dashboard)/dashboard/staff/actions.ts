@@ -58,3 +58,28 @@ export async function saveStaffScheduleAction(tenantId: string, staffId: string,
   revalidatePath('/dashboard/staff')
   return { success: true }
 }
+
+export async function generateInviteLinkAction(tenantId: string, staffId: string) {
+  const supabase = await createClient()
+  
+  // Verify ownership
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  const { data: tenant } = await supabase.from('tenants').select('id').eq('owner_id', user.id).eq('id', tenantId).single()
+  if (!tenant) return { error: 'No autorizado' }
+
+  // Generate a random token
+  const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+
+  const { data, error } = await supabase.from('staff_invites').insert({
+    tenant_id: tenantId,
+    staff_id: staffId,
+    token
+  }).select('token').single()
+
+  if (error) return { error: error.message }
+  
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  return { success: true, link: `${baseUrl}/invite/${data.token}` }
+}

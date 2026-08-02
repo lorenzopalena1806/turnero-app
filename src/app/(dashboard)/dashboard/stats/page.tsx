@@ -2,9 +2,12 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { DollarSign, TrendingUp, Users, Star, PieChart as PieChartIcon } from 'lucide-react'
+import { DollarSign, TrendingUp, Users, Star, PieChart as PieChartIcon, Clock } from 'lucide-react'
 import RevenueChart from '@/components/charts/RevenueChart'
 import StatusChart from '@/components/charts/StatusChart'
+import PeakHoursChart from '@/components/charts/PeakHoursChart'
+
+import { requireAdmin } from '@/utils/rbac'
 
 export default async function StatsPage({
   searchParams,
@@ -12,18 +15,8 @@ export default async function StatsPage({
   searchParams: Promise<{ range?: string }>
 }) {
   const { range = 'month' } = await searchParams
+  const { tenant } = await requireAdmin()
   const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: tenant } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!tenant) redirect('/login')
 
   const now = new Date()
   let startDate: Date
@@ -119,6 +112,18 @@ export default async function StatsPage({
 
   const revenueChartData = Object.entries(chartDataMap).map(([date, total]) => ({ date, total }))
 
+  // Prepare data for Peak Hours Chart
+  const hourCounts: Record<string, number> = {}
+  completedAppointments.forEach(app => {
+    const hour = format(parseISO(app.start_time), 'HH:00')
+    if (!hourCounts[hour]) hourCounts[hour] = 0
+    hourCounts[hour] += 1
+  })
+  
+  const peakHoursData = Object.entries(hourCounts)
+    .map(([hour, count]) => ({ hour, count }))
+    .sort((a, b) => a.hour.localeCompare(b.hour))
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -198,36 +203,46 @@ export default async function StatsPage({
 
       </div>
 
-      {/* Staff Ranking */}
-      <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2.5rem] p-8 shadow-xl shadow-indigo-900/5">
-        <h3 className="font-black text-indigo-950 text-xl mb-6 flex items-center gap-2">
-          <Users className="w-5 h-5 text-indigo-500" /> Podio del Personal ({tenant.staff_label || 'Staff'})
-        </h3>
-        
-        {staffStats.length === 0 ? (
-          <p className="text-center py-10 font-bold text-indigo-900/40 border-2 border-dashed border-indigo-50 rounded-2xl">
-            Aún no hay turnos completados para generar estadísticas.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {staffStats.map((stat, i) => (
-              <div key={i} className={`flex items-center justify-between p-6 rounded-3xl border-2 transition-all hover:-translate-y-1 ${i === 0 ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-transparent text-white shadow-lg shadow-indigo-500/25' : 'bg-white/60 border-white hover:border-indigo-100 shadow-sm'}`}>
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-xl ${i === 0 ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-400'}`}>
-                    #{i + 1}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Peak Hours Chart */}
+        <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2.5rem] p-8 shadow-xl shadow-indigo-900/5">
+          <h3 className="font-black text-indigo-950 text-xl mb-6 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-amber-500" /> Mapa de Calor (Horas Pico)
+          </h3>
+          <PeakHoursChart data={peakHoursData} />
+        </div>
+
+        {/* Staff Ranking */}
+        <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2.5rem] p-8 shadow-xl shadow-indigo-900/5">
+          <h3 className="font-black text-indigo-950 text-xl mb-6 flex items-center gap-2">
+            <Users className="w-5 h-5 text-indigo-500" /> Podio del Personal ({tenant.staff_label || 'Staff'})
+          </h3>
+          
+          {staffStats.length === 0 ? (
+            <p className="text-center py-10 font-bold text-indigo-900/40 border-2 border-dashed border-indigo-50 rounded-2xl">
+              Aún no hay turnos completados para generar estadísticas.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {staffStats.map((stat, i) => (
+                <div key={i} className={`flex items-center justify-between p-6 rounded-3xl border-2 transition-all hover:-translate-y-1 ${i === 0 ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-transparent text-white shadow-lg shadow-indigo-500/25' : 'bg-white/60 border-white hover:border-indigo-100 shadow-sm'}`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-xl ${i === 0 ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-400'}`}>
+                      #{i + 1}
+                    </div>
+                    <div>
+                      <h4 className={`font-black text-lg ${i === 0 ? 'text-white' : 'text-indigo-950'}`}>{stat.name}</h4>
+                      <p className={`text-xs font-bold ${i === 0 ? 'text-white/70' : 'text-indigo-900/50'}`}>{stat.appointments} turnos</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className={`font-black text-lg ${i === 0 ? 'text-white' : 'text-indigo-950'}`}>{stat.name}</h4>
-                    <p className={`text-xs font-bold ${i === 0 ? 'text-white/70' : 'text-indigo-900/50'}`}>{stat.appointments} turnos</p>
-                  </div>
+                  <p className={`text-2xl font-black ${i === 0 ? 'text-white' : 'text-indigo-600'}`}>
+                    ${stat.revenue.toLocaleString()}
+                  </p>
                 </div>
-                <p className={`text-2xl font-black ${i === 0 ? 'text-white' : 'text-indigo-600'}`}>
-                  ${stat.revenue.toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

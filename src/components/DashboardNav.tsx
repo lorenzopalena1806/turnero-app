@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ClipboardList, Calendar, Users, BarChart3, Settings, History } from 'lucide-react'
 
-export default function DashboardNav() {
+export default function DashboardNav({ isStaff = false }: { isStaff?: boolean }) {
   const pathname = usePathname()
 
-  const tabs = [
+  let tabs = [
     { name: 'Catálogo', href: '/dashboard', icon: ClipboardList, exact: true },
     { name: 'Agenda', href: '/dashboard/agenda', icon: Calendar },
     { name: 'Historial', href: '/dashboard/history', icon: History },
@@ -15,6 +15,12 @@ export default function DashboardNav() {
     { name: 'Estadísticas', href: '/dashboard/stats', icon: BarChart3 },
     { name: 'Configuración', href: '/dashboard/settings', icon: Settings },
   ]
+
+  if (isStaff) {
+    tabs = [
+      { name: 'Agenda', href: '/dashboard/agenda', icon: Calendar },
+    ]
+  }
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-8 overflow-x-auto hide-scrollbar">

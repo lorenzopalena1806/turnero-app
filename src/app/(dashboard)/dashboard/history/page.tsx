@@ -2,19 +2,11 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import HistoryTable from '@/components/HistoryTable'
 
+import { requireAdmin } from '@/utils/rbac'
+
 export default async function HistoryPage() {
+  const { tenant } = await requireAdmin()
   const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: tenant } = await supabase
-    .from('tenants')
-    .select('id')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!tenant) redirect('/login')
 
   // Fetch all staff members for the filter
   const { data: staffList } = await supabase

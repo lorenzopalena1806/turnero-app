@@ -5,19 +5,11 @@ import AddServiceForm from '@/components/AddServiceForm'
 import EditServiceModal from '@/components/EditServiceModal'
 import { deleteServiceAction } from './actions'
 
+import { requireAdmin } from '@/utils/rbac'
+
 export default async function DashboardPage() {
+  const { tenant } = await requireAdmin()
   const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: tenant } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!tenant) redirect('/login?error=no_role')
 
   const { data: services } = await supabase
     .from('services')

@@ -4,6 +4,8 @@ import AppointmentCard from '@/components/AppointmentCard'
 import { format, parseISO, startOfDay, addDays, isSameDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 
+import { getTenantContext } from '@/utils/rbac'
+
 export default async function AgendaPage({
   searchParams,
 }: {
@@ -12,16 +14,8 @@ export default async function AgendaPage({
   const { date } = await searchParams
   const supabase = await createClient()
   
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: tenant } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!tenant) redirect('/login?error=no_role')
+  const { tenant, role, staffProfileId } = await getTenantContext()
+  const isStaff = role === 'STAFF'
 
   // Selected date or today
   const selectedDate = date ? parseISO(date) : new Date()
@@ -30,13 +24,19 @@ export default async function AgendaPage({
   const start = startOfDay(selectedDate).toISOString()
   const end = new Date(startOfDay(selectedDate).getTime() + 24 * 60 * 60 * 1000).toISOString()
 
-  const { data: appointments } = await supabase
+  let query = supabase
     .from('appointments')
     .select('*, staff(*)')
     .eq('tenant_id', tenant.id)
     .gte('start_time', start)
     .lt('start_time', end)
     .order('start_time', { ascending: true })
+
+  if (isStaff && staffProfileId) {
+    query = query.eq('staff_id', staffProfileId)
+  }
+
+  const { data: appointments } = await query
 
   // Generate date tabs: today + 30 days in the future
   const today = new Date()
@@ -78,14 +78,14 @@ export default async function AgendaPage({
       <script dangerouslySetInnerHTML={{ __html: `setTimeout(() => document.getElementById('selected-date')?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }), 50);` }} />
 
       {/* Appointments Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
         {appointments?.length === 0 ? (
           <div className="col-span-full bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-12 border border-white shadow-xl shadow-indigo-900/5 text-center">
-            <p className="text-indigo-900/50 font-bold">No tienes turnos programados para este día.</p>
+            <p className="text-indigo-900/50 font-bold text-lg">Hoy no tenemos más turnos, pero fíjate otro día.</p>
           </div>
         ) : (
           appointments?.map(appt => (
-            <AppointmentCard key={appt.id} appointment={appt} />
+            <AppointmentCard key={appt.id} appointment={appt} requirePaymentMethod={tenant.require_payment_method} />
           ))
         )}
       </div>

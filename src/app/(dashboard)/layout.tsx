@@ -4,23 +4,15 @@ import Link from 'next/link'
 import { LogOut, ExternalLink } from 'lucide-react'
 import DashboardNav from '@/components/DashboardNav'
 
+import { getTenantContext } from '@/utils/rbac'
+
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: tenant } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!tenant) redirect('/login?error=no_role')
+  const { tenant, role } = await getTenantContext()
+  const isStaff = role === 'STAFF'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-indigo-950 font-sans flex flex-col relative overflow-hidden">
@@ -62,7 +54,7 @@ export default async function DashboardLayout({
         </div>
         
         {/* Tabs Bar */}
-        <DashboardNav />
+        <DashboardNav isStaff={isStaff} />
       </header>
 
       {/* Main Content */}

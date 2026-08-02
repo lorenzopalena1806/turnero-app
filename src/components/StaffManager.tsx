@@ -114,7 +114,31 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
                 <div className="w-12 h-12 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-black text-xl">
                   {member.name.charAt(0)}
                 </div>
-                <h3 className="font-black text-indigo-950 text-xl">{member.name}</h3>
+                <div>
+                  <h3 className="font-black text-indigo-950 text-xl leading-tight">{member.name}</h3>
+                  {member.tenant_users && member.tenant_users.length > 0 ? (
+                    <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest">Cuenta Vinculada</span>
+                  ) : (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        startTransition(async () => {
+                          const { generateInviteLinkAction } = await import('@/app/(dashboard)/dashboard/staff/actions')
+                          const res = await generateInviteLinkAction(tenantId, member.id)
+                          if (res.success) {
+                            navigator.clipboard.writeText(res.link as string)
+                            alert(`Enlace copiado al portapapeles:\n\n${res.link}`)
+                          } else {
+                            alert(res.error)
+                          }
+                        })
+                      }}
+                      className="text-[10px] font-bold text-purple-500 hover:text-purple-600 uppercase tracking-widest underline underline-offset-2"
+                    >
+                      Generar Invitación
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button 

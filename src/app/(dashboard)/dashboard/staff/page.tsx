@@ -2,23 +2,15 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import StaffManager from '@/components/StaffManager'
 
+import { requireAdmin } from '@/utils/rbac'
+
 export default async function StaffPage() {
+  const { tenant } = await requireAdmin()
   const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: tenant } = await supabase
-    .from('tenants')
-    .select('*')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!tenant) redirect('/login?error=no_role')
 
   const { data: staff } = await supabase
     .from('staff')
-    .select('*')
+    .select('*, tenant_users(id, user_id)')
     .eq('tenant_id', tenant.id)
     .order('created_at', { ascending: true })
 

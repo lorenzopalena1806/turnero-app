@@ -112,6 +112,9 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
                 className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-6 flex flex-col h-full justify-between gap-6 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group"
               >
                 <div>
+                  {service.image_url && (
+                    <img src={service.image_url} alt={service.name} className="w-full h-48 object-cover rounded-xl mb-4" />
+                  )}
                   <h3 className="text-xl font-black text-slate-900 leading-tight mb-2">{service.name}</h3>
                   <p className="text-3xl font-black mt-3" style={{ color: themeColor }}>
                     ${service.price}
@@ -135,6 +138,50 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
             ))
           )}
         </div>
+
+        {/* Redes Sociales y Mapa */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+          {(tenant.instagram_url || tenant.tiktok_url || tenant.whatsapp_url) && (
+            <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-8 shadow-xl flex flex-col justify-center">
+              <h3 className="text-2xl font-black text-slate-900 mb-6">Síguenos en Redes</h3>
+              <div className="flex flex-wrap gap-4">
+                {tenant.instagram_url && (
+                  <a href={tenant.instagram_url} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-tr from-orange-400 to-pink-500 text-white font-black px-6 py-3 rounded-xl hover:scale-105 transition-transform shadow-lg">
+                    Instagram
+                  </a>
+                )}
+                {tenant.tiktok_url && (
+                  <a href={tenant.tiktok_url} target="_blank" rel="noopener noreferrer" className="bg-black text-white font-black px-6 py-3 rounded-xl hover:scale-105 transition-transform shadow-lg">
+                    TikTok
+                  </a>
+                )}
+                {tenant.whatsapp_url && (
+                  <a href={tenant.whatsapp_url} target="_blank" rel="noopener noreferrer" className="bg-emerald-500 text-white font-black px-6 py-3 rounded-xl hover:scale-105 transition-transform shadow-lg">
+                    WhatsApp
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {tenant.address_map_url && (
+            <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-8 shadow-xl">
+              <h3 className="text-2xl font-black text-slate-900 mb-6">¿Dónde estamos?</h3>
+              <div className="w-full h-48 rounded-xl overflow-hidden bg-slate-100">
+                <iframe 
+                  src={tenant.address_map_url} 
+                  width="100%" 
+                  height="100%" 
+                  style={{ border: 0 }} 
+                  allowFullScreen 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
+            </div>
+          )}
+        </div>
+
       </main>
 
       {/* Variant Modal */}

@@ -2,21 +2,35 @@
 
 import { updateAppointmentStatus } from '@/app/(dashboard)/dashboard/agenda/actions'
 import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import { Check, X, Clock, MessageCircle } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { User } from 'lucide-react'
 
-export default function AppointmentCard({ appointment }: { appointment: any }) {
+export default function AppointmentCard({ appointment, requirePaymentMethod = false }: { appointment: any, requirePaymentMethod?: boolean }) {
   const [isPending, startTransition] = useTransition()
   const [status, setStatus] = useState(appointment.status)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
-  const handleStatusChange = (newStatus: string) => {
+  const handleStatusChange = (newStatus: string, paymentMethod?: string) => {
     startTransition(async () => {
-      const res = await updateAppointmentStatus(appointment.id, newStatus)
+      const res = await updateAppointmentStatus(appointment.id, newStatus, paymentMethod)
       if (res.success) {
         setStatus(newStatus)
+        setShowPaymentModal(false)
+        toast.success(`Turno ${statusLabels[newStatus]} correctamente`)
+      } else {
+        toast.error('Hubo un error al actualizar el turno')
       }
     })
+  }
+
+  const handleCompleteClick = () => {
+    if (requirePaymentMethod) {
+      setShowPaymentModal(true)
+    } else {
+      handleStatusChange('completed')
+    }
   }
 
   // El servidor guarda la hora local como si fuera UTC.
@@ -50,74 +64,110 @@ export default function AppointmentCard({ appointment }: { appointment: any }) {
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-xl border-2 rounded-[2rem] p-6 shadow-xl shadow-indigo-900/5 transition-all border-indigo-50 hover:-translate-y-1">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h4 className="font-black text-indigo-950 text-xl">{appointment.customer_name}</h4>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="text-indigo-900/50 font-bold text-sm">{appointment.customer_phone}</p>
-            {appointment.customer_phone && (
-              <a 
-                href={`https://wa.me/${appointment.customer_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${appointment.customer_name}, te escribimos para confirmar tu turno hoy a las ${startTimeStr}. ¿Nos confirmas tu asistencia?`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-500 hover:text-emerald-600 bg-emerald-50 hover:bg-emerald-100 p-1.5 rounded-lg transition-colors"
-                title="Confirmar asistencia por WhatsApp"
-              >
-                <MessageCircle className="w-4 h-4" />
-              </a>
-            )}
+    <>
+      <div className="bg-white/90 backdrop-blur-xl border-2 rounded-[2rem] p-6 shadow-xl shadow-indigo-900/5 transition-all border-indigo-50 hover:-translate-y-1">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h4 className="font-black text-indigo-950 text-xl">{appointment.customer_name}</h4>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-indigo-900/50 font-bold text-sm">{appointment.customer_phone}</p>
+              {appointment.customer_phone && (
+                <a 
+                  href={`https://wa.me/${appointment.customer_phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${appointment.customer_name}, te escribimos para confirmar tu turno hoy a las ${startTimeStr}. ¿Nos confirmas tu asistencia?`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-500 hover:text-emerald-600 bg-emerald-50 hover:bg-emerald-100 p-1.5 rounded-lg transition-colors"
+                  title="Confirmar asistencia por WhatsApp"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                </a>
+              )}
+            </div>
+          </div>
+          <span className={`text-xs uppercase font-black tracking-widest px-3 py-1 rounded-lg border ${statusColors[status] || statusColors.pending}`}>
+            {statusLabels[status] || status}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 text-indigo-900/70 font-bold bg-indigo-50/50 w-fit px-3 py-1.5 rounded-xl border border-indigo-100">
+            <Clock className="w-4 h-4 text-purple-500" />
+            {startTimeStr} - {endTimeStr}
+          </div>
+          {appointment.staff && (
+            <div className="flex items-center gap-2 text-indigo-900/70 font-bold bg-indigo-50/50 w-fit px-3 py-1.5 rounded-xl border border-indigo-100">
+              <User className="w-4 h-4 text-purple-500" />
+              {appointment.staff.name}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2 mb-6">
+          {appointment.services.map((s: any, i: number) => (
+            <div key={i} className="flex justify-between text-sm">
+              <span className="text-indigo-950 font-bold">{s.name}</span>
+              <span className="text-purple-600 font-black">${s.price}</span>
+            </div>
+          ))}
+          <div className="border-t border-indigo-50 pt-2 flex justify-between mt-2">
+            <span className="text-indigo-900/50 font-black text-xs uppercase tracking-widest">Total</span>
+            <span className="text-indigo-950 font-black">${appointment.total_price}</span>
           </div>
         </div>
-        <span className={`text-xs uppercase font-black tracking-widest px-3 py-1 rounded-lg border ${statusColors[status] || statusColors.pending}`}>
-          {statusLabels[status] || status}
-        </span>
-      </div>
 
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <div className="flex items-center gap-2 text-indigo-900/70 font-bold bg-indigo-50/50 w-fit px-3 py-1.5 rounded-xl border border-indigo-100">
-          <Clock className="w-4 h-4 text-purple-500" />
-          {startTimeStr} - {endTimeStr}
-        </div>
-        {appointment.staff && (
-          <div className="flex items-center gap-2 text-indigo-900/70 font-bold bg-indigo-50/50 w-fit px-3 py-1.5 rounded-xl border border-indigo-100">
-            <User className="w-4 h-4 text-purple-500" />
-            {appointment.staff.name}
+        {status === 'pending' && (
+          <div className="flex gap-2">
+            <button 
+              disabled={isPending}
+              onClick={handleCompleteClick}
+              className="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+            >
+              <Check className="w-4 h-4" /> Completar
+            </button>
+            <button 
+              disabled={isPending}
+              onClick={() => handleStatusChange('cancelled')}
+              className="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+            >
+              <X className="w-4 h-4" /> Cancelar
+            </button>
           </div>
         )}
       </div>
 
-      <div className="space-y-2 mb-6">
-        {appointment.services.map((s: any, i: number) => (
-          <div key={i} className="flex justify-between text-sm">
-            <span className="text-indigo-950 font-bold">{s.name}</span>
-            <span className="text-purple-600 font-black">${s.price}</span>
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-950/20 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-[2rem] p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+            <h3 className="font-black text-indigo-950 text-xl mb-2 text-center">¿Cómo pagó el cliente?</h3>
+            <p className="text-indigo-900/50 font-bold text-center mb-6 text-sm">Selecciona el método de pago para registrarlo.</p>
+            
+            <div className="flex gap-3">
+              <button 
+                disabled={isPending}
+                onClick={() => handleStatusChange('completed', 'efectivo')}
+                className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-black py-4 rounded-xl transition-colors disabled:opacity-50"
+              >
+                Efectivo
+              </button>
+              <button 
+                disabled={isPending}
+                onClick={() => handleStatusChange('completed', 'transferencia')}
+                className="flex-1 bg-purple-50 hover:bg-purple-100 text-purple-700 font-black py-4 rounded-xl transition-colors disabled:opacity-50"
+              >
+                Transferencia
+              </button>
+            </div>
+            
+            <button 
+              disabled={isPending}
+              onClick={() => setShowPaymentModal(false)}
+              className="mt-4 w-full text-indigo-900/40 hover:text-indigo-900/70 font-bold py-2 transition-colors text-sm"
+            >
+              Cancelar
+            </button>
           </div>
-        ))}
-        <div className="border-t border-indigo-50 pt-2 flex justify-between mt-2">
-          <span className="text-indigo-900/50 font-black text-xs uppercase tracking-widest">Total</span>
-          <span className="text-indigo-950 font-black">${appointment.total_price}</span>
-        </div>
-      </div>
-
-      {status === 'pending' && (
-        <div className="flex gap-2">
-          <button 
-            disabled={isPending}
-            onClick={() => handleStatusChange('completed')}
-            className="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-          >
-            <Check className="w-4 h-4" /> Completar
-          </button>
-          <button 
-            disabled={isPending}
-            onClick={() => handleStatusChange('cancelled')}
-            className="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 font-black py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-          >
-            <X className="w-4 h-4" /> Cancelar
-          </button>
         </div>
       )}
-    </div>
+    </>
   )
 }
