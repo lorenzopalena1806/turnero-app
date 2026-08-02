@@ -3,18 +3,54 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function addStaffAction(tenantId: string, name: string) {
+import { createClient as createJSClient } from '@supabase/supabase-js'
+
+export async function addStaffAction(tenantId: string, name: string, email?: string, password?: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autorizado' }
 
-  const { error } = await supabase.from('staff').insert({
+  let authUserId = null;
+
+  // Si se provee email y contraseña, creamos la cuenta usando un cliente anónimo
+  // para no cerrar la sesión actual del dueño.
+  if (email && password) {
+    const anonSupabase = createJSClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false } }
+    )
+    const { data: authData, error: authError } = await anonSupabase.auth.signUp({
+      email,
+      password
+    })
+    
+    if (authError) return { error: `Error creando cuenta: ${authError.message}` }
+    if (!authData.user) return { error: 'No se pudo crear la cuenta del usuario.' }
+    
+    authUserId = authData.user.id
+  }
+
+  // Insertar en la tabla staff
+  const { data: staffData, error } = await supabase.from('staff').insert({
     tenant_id: tenantId,
     name,
     is_active: true
-  })
+  }).select('id').single()
 
   if (error) return { error: error.message }
+
+  // Si creamos una cuenta, la vinculamos en tenant_users
+  if (authUserId && staffData) {
+    const { error: rbacError } = await supabase.from('tenant_users').insert({
+      user_id: authUserId,
+      tenant_id: tenantId,
+      role: 'STAFF',
+      staff_profile_id: staffData.id
+    })
+    if (rbacError) return { error: 'Staff creado, pero hubo un error asignando permisos.' }
+  }
+
   revalidatePath('/dashboard/staff')
   return { success: true }
 }

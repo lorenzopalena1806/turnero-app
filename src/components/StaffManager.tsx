@@ -9,6 +9,8 @@ const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', '
 export default function StaffManager({ tenantId, staff, schedules, staffLabel }: { tenantId: string, staff: any[], schedules: any[], staffLabel: string }) {
   const [isPending, startTransition] = useTransition()
   const [newStaffName, setNewStaffName] = useState('')
+  const [newStaffEmail, setNewStaffEmail] = useState('')
+  const [newStaffPassword, setNewStaffPassword] = useState('')
   const [expandedStaff, setExpandedStaff] = useState<string | null>(null)
 
   // Form state for the currently expanded staff's schedule
@@ -18,8 +20,15 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
     e.preventDefault()
     if (!newStaffName) return
     startTransition(async () => {
-      await addStaffAction(tenantId, newStaffName)
-      setNewStaffName('')
+      const res = await addStaffAction(tenantId, newStaffName, newStaffEmail, newStaffPassword)
+      if (res.error) {
+        alert(res.error)
+      } else {
+        setNewStaffName('')
+        setNewStaffEmail('')
+        setNewStaffPassword('')
+        alert('Profesional agregado exitosamente.')
+      }
     })
   }
 
@@ -85,24 +94,50 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
   return (
     <div className="space-y-8">
       {/* Agregar Staff */}
-      <form onSubmit={handleAddStaff} className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-6 shadow-xl shadow-indigo-900/5 flex gap-4 items-end">
-        <div className="flex-1">
-          <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Nuevo {staffLabel}</label>
-          <input 
-            type="text" 
-            placeholder="Ej: Marcos"
-            value={newStaffName}
-            onChange={e => setNewStaffName(e.target.value)}
-            className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 focus:outline-none focus:border-purple-400 font-bold text-sm"
-          />
+      <form onSubmit={handleAddStaff} className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-6 shadow-xl shadow-indigo-900/5">
+        <h3 className="font-black text-indigo-950 text-xl mb-4">Agregar Nuevo {staffLabel}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div>
+            <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Nombre</label>
+            <input 
+              type="text" 
+              placeholder="Ej: Marcos"
+              value={newStaffName}
+              onChange={e => setNewStaffName(e.target.value)}
+              className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 focus:outline-none focus:border-purple-400 font-bold text-sm"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Email de Acceso (Opcional)</label>
+            <input 
+              type="email" 
+              placeholder="marcos@tupelu.com"
+              value={newStaffEmail}
+              onChange={e => setNewStaffEmail(e.target.value)}
+              className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 focus:outline-none focus:border-purple-400 font-bold text-sm"
+            />
+          </div>
+          <div className="flex gap-4 items-end">
+            <div className="flex-1">
+              <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Contraseña</label>
+              <input 
+                type="text" 
+                placeholder="********"
+                value={newStaffPassword}
+                onChange={e => setNewStaffPassword(e.target.value)}
+                className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 focus:outline-none focus:border-purple-400 font-bold text-sm"
+              />
+            </div>
+            <button 
+              type="submit"
+              disabled={isPending || !newStaffName || (!!newStaffEmail && !newStaffPassword)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-2xl transition-colors disabled:opacity-50"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-        <button 
-          type="submit"
-          disabled={isPending || !newStaffName}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-2xl transition-colors disabled:opacity-50"
-        >
-          <Plus className="w-5 h-5" />
-        </button>
       </form>
 
       {/* Lista de Staff */}
@@ -119,24 +154,7 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
                   {member.tenant_users && member.tenant_users.length > 0 ? (
                     <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest">Cuenta Vinculada</span>
                   ) : (
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        startTransition(async () => {
-                          const { generateInviteLinkAction } = await import('@/app/(dashboard)/dashboard/staff/actions')
-                          const res = await generateInviteLinkAction(tenantId, member.id)
-                          if (res.success) {
-                            navigator.clipboard.writeText(res.link as string)
-                            alert(`Enlace copiado al portapapeles:\n\n${res.link}`)
-                          } else {
-                            alert(res.error)
-                          }
-                        })
-                      }}
-                      className="text-[10px] font-bold text-purple-500 hover:text-purple-600 uppercase tracking-widest underline underline-offset-2"
-                    >
-                      Generar Invitación
-                    </button>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sin Cuenta</span>
                   )}
                 </div>
               </div>
