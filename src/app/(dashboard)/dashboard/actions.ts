@@ -8,6 +8,7 @@ export async function addServiceAction(prevState: any, formData: FormData) {
   const price = parseFloat(formData.get('price') as string)
   const durationMinutes = parseInt(formData.get('duration_minutes') as string, 10)
   const tenantId = formData.get('tenant_id') as string
+  const imageUrl = formData.get('image_url') as string
   
   let variants = []
   try {
@@ -29,7 +30,8 @@ export async function addServiceAction(prevState: any, formData: FormData) {
     name,
     price,
     duration_minutes: durationMinutes,
-    variants
+    variants,
+    image_url: imageUrl || null
   })
 
   if (error) {
@@ -66,6 +68,7 @@ export async function editServiceAction(prevState: any, formData: FormData) {
   const price = parseFloat(formData.get('price') as string)
   const durationMinutes = parseInt(formData.get('duration_minutes') as string, 10)
   const tenantId = formData.get('tenant_id') as string
+  const imageUrl = formData.get('image_url') as string
   
   let variants = []
   try {
@@ -88,7 +91,8 @@ export async function editServiceAction(prevState: any, formData: FormData) {
       name,
       price,
       duration_minutes: durationMinutes,
-      variants
+      variants,
+      image_url: imageUrl || null
     })
     .eq('id', id)
     .eq('tenant_id', tenantId)

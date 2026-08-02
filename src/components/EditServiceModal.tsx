@@ -86,6 +86,17 @@ export default function EditServiceModal({ service, tenantId }: { service: any, 
                     className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 font-bold text-sm"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Foto del Servicio (URL)</label>
+                  <input 
+                    type="url" 
+                    name="image_url" 
+                    defaultValue={service.image_url}
+                    placeholder="https://ejemplo.com/foto.jpg"
+                    className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 placeholder-indigo-300 focus:outline-none focus:border-purple-400 font-bold text-sm"
+                  />
+                </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
