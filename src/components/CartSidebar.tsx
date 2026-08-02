@@ -416,10 +416,12 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
                 
                 <div className="space-y-3">
                   {selections.map((sel, idx) => {
+                    const staffName = staff.find(s => s.id === sel.staffId)?.name
                     return (
                       <div key={idx} className="bg-white/60 p-3 rounded-xl border border-purple-100">
                         <p className="font-black text-sm">{sel.serviceName}</p>
                         <p className="text-xs font-bold text-slate-600 mt-1">Para: {sel.customerName}</p>
+                        <p className="text-xs font-bold text-slate-600 mt-1">Con: {staffName}</p>
                         <p className="text-xs font-bold text-purple-700 mt-1">{format(sel.date!, 'dd/MM/yyyy')} a las {sel.time}</p>
                       </div>
                     )
