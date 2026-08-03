@@ -111,18 +111,24 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
                 key={service.id} 
                 className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-6 flex flex-col h-full justify-between gap-6 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group"
               >
-                <div>
-                  {service.image_url && (
-                    <img src={service.image_url} alt={service.name} className="w-full h-48 object-cover rounded-xl mb-4" />
-                  )}
-                  <h3 className="text-xl font-black text-slate-900 leading-tight mb-2">{service.name}</h3>
-                  <p className="text-3xl font-black mt-3" style={{ color: themeColor }}>
-                    ${service.price}
-                  </p>
-                  {service.variants && service.variants.length > 0 && (
-                    <p className="text-xs font-bold text-slate-400 mt-2">
-                      + {service.variants.length} variantes disponibles
+                <div className="flex gap-5 items-start">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-black text-slate-900 leading-tight mb-2">{service.name}</h3>
+                    <p className="text-3xl font-black mt-3" style={{ color: themeColor }}>
+                      ${service.price}
                     </p>
+                    {service.variants && service.variants.length > 0 && (
+                      <p className="text-xs font-bold text-slate-400 mt-2">
+                        + {service.variants.length} variantes disponibles
+                      </p>
+                    )}
+                  </div>
+                  {service.image_url && (
+                    <img 
+                      src={service.image_url} 
+                      alt={service.name} 
+                      className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-2xl shrink-0 shadow-md border border-slate-100" 
+                    />
                   )}
                 </div>
                 
