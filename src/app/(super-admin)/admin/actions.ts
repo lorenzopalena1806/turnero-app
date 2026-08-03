@@ -52,3 +52,43 @@ export async function createTenant(prevState: any, formData: FormData) {
     return { error: `Error inesperado: ${error.message}` }
   }
 }
+
+export async function toggleTenantStatusAction(tenantId: string, currentStatus: boolean) {
+  try {
+    const adminAuthClient = createAdminClient()
+    const { error } = await adminAuthClient
+      .from('tenants')
+      .update({ is_active: !currentStatus })
+      .eq('id', tenantId)
+
+    if (error) return { error: `Error cambiando estado: ${error.message}` }
+    revalidatePath('/admin')
+    return { success: true }
+  } catch (error: any) {
+    return { error: `Error inesperado: ${error.message}` }
+  }
+}
+
+export async function deleteTenantAction(tenantId: string, ownerId: string) {
+  try {
+    const adminAuthClient = createAdminClient()
+    
+    // 1. Delete tenant record
+    const { error: dbError } = await adminAuthClient
+      .from('tenants')
+      .delete()
+      .eq('id', tenantId)
+
+    if (dbError) return { error: `Error borrando comercio: ${dbError.message}` }
+
+    // 2. Delete user from auth so they can't log in anymore
+    if (ownerId) {
+      await adminAuthClient.auth.admin.deleteUser(ownerId)
+    }
+
+    revalidatePath('/admin')
+    return { success: true }
+  } catch (error: any) {
+    return { error: `Error inesperado: ${error.message}` }
+  }
+}

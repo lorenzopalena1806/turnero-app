@@ -18,6 +18,22 @@ export default async function TenantPage({ params }: { params: Promise<{ tenant_
     notFound()
   }
 
+  if (tenant.is_active === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950 p-6">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 max-w-md w-full text-center space-y-4">
+          <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <h2 className="text-2xl font-black text-white">Local Pausado</h2>
+          <p className="text-neutral-400 font-bold">
+            Este comercio se encuentra temporalmente suspendido. Por favor intenta de nuevo más tarde o comunícate con el dueño.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   // Fetch their services
   const { data: services } = await supabase
     .from('services')

@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import CreateTenantForm from '@/components/CreateTenantForm'
+import TenantAdminActions from '@/components/TenantAdminActions'
 import { LogOut, Globe, Sparkles } from 'lucide-react'
 
 export default async function AdminDashboardPage() {
@@ -78,8 +79,15 @@ export default async function AdminDashboardPage() {
 
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-6">
-                    <h3 className="text-2xl font-black text-indigo-950">{tenant.name}</h3>
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center text-indigo-600 font-black text-lg">
+                    <div>
+                      <h3 className="text-2xl font-black text-indigo-950">{tenant.name}</h3>
+                      {!tenant.is_active && (
+                        <span className="inline-block mt-1 bg-rose-100 text-rose-700 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md">
+                          PAUSADO
+                        </span>
+                      )}
+                    </div>
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-lg ${tenant.is_active ? 'bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-600' : 'bg-rose-100 text-rose-500'}`}>
                       {tenant.name.charAt(0)}
                     </div>
                   </div>
@@ -109,6 +117,14 @@ export default async function AdminDashboardPage() {
                   <span className="bg-purple-100 text-purple-700 text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-xl">
                     Hace {Math.floor((Date.now() - new Date(tenant.created_at).getTime()) / (1000 * 60 * 60 * 24))} días
                   </span>
+                </div>
+
+                <div className="relative z-10">
+                  <TenantAdminActions 
+                    tenantId={tenant.id} 
+                    ownerId={tenant.owner_id} 
+                    isActive={tenant.is_active !== false} 
+                  />
                 </div>
               </div>
             ))
