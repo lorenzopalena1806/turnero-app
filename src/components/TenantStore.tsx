@@ -1,7 +1,7 @@
 'use client'
 
 import { useCart } from './CartProvider'
-import { Plus, X, Check } from 'lucide-react'
+import { Plus, X, Check, Instagram, MessageCircle, Music } from 'lucide-react'
 import { useState } from 'react'
 import CartSidebar from './CartSidebar'
 
@@ -150,20 +150,23 @@ export default function TenantStore({ tenant, services, staff }: { tenant: any, 
           {(tenant.instagram_url || tenant.tiktok_url || tenant.whatsapp_url) && (
             <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-8 shadow-xl flex flex-col justify-center">
               <h3 className="text-2xl font-black text-slate-900 mb-6">Síguenos en Redes</h3>
-              <div className="flex flex-wrap gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                 {tenant.instagram_url && (
-                  <a href={tenant.instagram_url} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-tr from-orange-400 to-pink-500 text-white font-black px-6 py-3 rounded-xl hover:scale-105 transition-transform shadow-lg">
-                    Instagram
+                  <a href={tenant.instagram_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 bg-gradient-to-tr from-orange-400 to-pink-500 text-white font-black px-6 py-4 rounded-2xl hover:-translate-y-1 hover:shadow-2xl transition-all shadow-lg group">
+                    <Instagram className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    <span>Instagram</span>
                   </a>
                 )}
                 {tenant.tiktok_url && (
-                  <a href={tenant.tiktok_url} target="_blank" rel="noopener noreferrer" className="bg-black text-white font-black px-6 py-3 rounded-xl hover:scale-105 transition-transform shadow-lg">
-                    TikTok
+                  <a href={tenant.tiktok_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 bg-slate-900 text-white font-black px-6 py-4 rounded-2xl hover:-translate-y-1 hover:shadow-2xl transition-all shadow-lg group">
+                    <Music className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    <span>TikTok</span>
                   </a>
                 )}
                 {tenant.whatsapp_url && (
-                  <a href={tenant.whatsapp_url} target="_blank" rel="noopener noreferrer" className="bg-emerald-500 text-white font-black px-6 py-3 rounded-xl hover:scale-105 transition-transform shadow-lg">
-                    WhatsApp
+                  <a href={tenant.whatsapp_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 bg-emerald-500 text-white font-black px-6 py-4 rounded-2xl hover:-translate-y-1 hover:shadow-2xl transition-all shadow-lg group">
+                    <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    <span>WhatsApp</span>
                   </a>
                 )}
               </div>
