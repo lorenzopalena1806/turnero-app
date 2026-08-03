@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { addStaffAction, deleteStaffAction, saveStaffScheduleAction, StaffScheduleInput } from '@/app/(dashboard)/dashboard/staff/actions'
+import { addStaffAction, deleteStaffAction, saveStaffScheduleAction, editStaffAction, StaffScheduleInput } from '@/app/(dashboard)/dashboard/staff/actions'
 import { Plus, Trash2, Clock, Save, ChevronDown, ChevronUp } from 'lucide-react'
 
 const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -11,7 +11,13 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
   const [newStaffName, setNewStaffName] = useState('')
   const [newStaffEmail, setNewStaffEmail] = useState('')
   const [newStaffPassword, setNewStaffPassword] = useState('')
+  const [newStaffImageUrl, setNewStaffImageUrl] = useState('')
   const [expandedStaff, setExpandedStaff] = useState<string | null>(null)
+  
+  // Edit staff state
+  const [editingStaffId, setEditingStaffId] = useState<string | null>(null)
+  const [editStaffName, setEditStaffName] = useState('')
+  const [editStaffImageUrl, setEditStaffImageUrl] = useState('')
 
   // Form state for the currently expanded staff's schedule
   const [formSchedules, setFormSchedules] = useState<StaffScheduleInput[]>([])
@@ -20,13 +26,14 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
     e.preventDefault()
     if (!newStaffName) return
     startTransition(async () => {
-      const res = await addStaffAction(tenantId, newStaffName, newStaffEmail, newStaffPassword)
+      const res = await addStaffAction(tenantId, newStaffName, newStaffEmail, newStaffPassword, newStaffImageUrl)
       if (res.error) {
         alert(res.error)
       } else {
         setNewStaffName('')
         setNewStaffEmail('')
         setNewStaffPassword('')
+        setNewStaffImageUrl('')
         alert('Profesional agregado exitosamente.')
       }
     })
@@ -42,6 +49,7 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
   const handleExpand = (staffId: string) => {
     if (expandedStaff === staffId) {
       setExpandedStaff(null)
+      setEditingStaffId(null)
       return
     }
     
@@ -91,12 +99,26 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
     })
   }
 
+  const handleEditStaff = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingStaffId || !editStaffName) return
+    startTransition(async () => {
+      const res = await editStaffAction(editingStaffId, editStaffName, editStaffImageUrl)
+      if (res.error) {
+        alert(res.error)
+      } else {
+        setEditingStaffId(null)
+        alert('Datos guardados correctamente')
+      }
+    })
+  }
+
   return (
     <div className="space-y-8">
       {/* Agregar Staff */}
       <form onSubmit={handleAddStaff} className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-6 shadow-xl shadow-indigo-900/5">
         <h3 className="font-black text-indigo-950 text-xl mb-4">Agregar Nuevo {staffLabel}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
           <div>
             <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Nombre</label>
             <input 
@@ -109,7 +131,17 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Email de Acceso (Opcional)</label>
+            <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Foto URL (Opcional)</label>
+            <input 
+              type="url" 
+              placeholder="Ej: https://..."
+              value={newStaffImageUrl}
+              onChange={e => setNewStaffImageUrl(e.target.value)}
+              className="w-full bg-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl px-5 py-4 text-indigo-950 focus:outline-none focus:border-purple-400 font-bold text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Email (Opcional)</label>
             <input 
               type="email" 
               placeholder="marcos@tupelu.com"
@@ -146,9 +178,13 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
           <div key={member.id} className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-6 shadow-xl shadow-indigo-900/5">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => handleExpand(member.id)}>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-black text-xl">
-                  {member.name.charAt(0)}
-                </div>
+                {member.image_url ? (
+                  <img src={member.image_url} alt={member.name} className="w-12 h-12 rounded-full object-cover shadow-sm" />
+                ) : (
+                  <div className="w-12 h-12 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-black text-xl">
+                    {member.name.charAt(0)}
+                  </div>
+                )}
                 <div>
                   <h3 className="font-black text-indigo-950 text-xl leading-tight">{member.name}</h3>
                   {member.tenant_users && member.tenant_users.length > 0 ? (
@@ -174,6 +210,62 @@ export default function StaffManager({ tenantId, staff, schedules, staffLabel }:
             {/* Schedule Editor (Expanded) */}
             {expandedStaff === member.id && (
               <div className="mt-8 border-t border-indigo-50 pt-8 animate-in slide-in-from-top-4 duration-300">
+                {editingStaffId === member.id ? (
+                  <form onSubmit={handleEditStaff} className="mb-8 p-6 bg-indigo-50/30 rounded-2xl border border-indigo-100">
+                    <h4 className="font-black text-indigo-950 mb-4">Editar Datos de {member.name}</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end mb-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Nombre</label>
+                        <input 
+                          type="text" 
+                          value={editStaffName}
+                          onChange={e => setEditStaffName(e.target.value)}
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-3 text-indigo-950 focus:outline-none focus:border-purple-400 font-bold text-sm"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Foto URL (Opcional)</label>
+                        <input 
+                          type="url" 
+                          value={editStaffImageUrl}
+                          onChange={e => setEditStaffImageUrl(e.target.value)}
+                          className="w-full bg-white border border-indigo-200 rounded-xl px-4 py-3 text-indigo-950 focus:outline-none focus:border-purple-400 font-bold text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3">
+                      <button 
+                        type="button" 
+                        onClick={() => setEditingStaffId(null)}
+                        className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-800"
+                      >
+                        Cancelar
+                      </button>
+                      <button 
+                        type="submit"
+                        disabled={isPending}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2 px-6 rounded-xl transition-colors disabled:opacity-50"
+                      >
+                        Guardar Datos
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="mb-6 flex justify-end">
+                    <button 
+                      onClick={() => {
+                        setEditingStaffId(member.id)
+                        setEditStaffName(member.name)
+                        setEditStaffImageUrl(member.image_url || '')
+                      }}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-800 uppercase tracking-widest"
+                    >
+                      ✏️ Editar Datos Personales
+                    </button>
+                  </div>
+                )}
+
                 <h4 className="font-black text-indigo-950 mb-6 flex items-center gap-2">
                   <Clock className="w-5 h-5 text-purple-500" />
                   Horarios de {member.name}

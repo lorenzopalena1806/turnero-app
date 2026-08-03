@@ -342,11 +342,18 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
                       <button
                         key={member.id}
                         onClick={() => handleStaffSelect(member.id)}
-                        className={`p-3 rounded-2xl border-2 text-center transition-all ${
+                        className={`p-3 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-center gap-2 ${
                           isSelected ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-slate-100 bg-white text-slate-600 hover:border-purple-200'
                         }`}
                       >
-                        <span className="font-black block truncate">{member.name}</span>
+                        {member.image_url ? (
+                          <img src={member.image_url} alt={member.name} className="w-10 h-10 rounded-full object-cover shadow-sm" />
+                        ) : (
+                          <div className="w-10 h-10 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-black text-sm">
+                            {member.name.charAt(0)}
+                          </div>
+                        )}
+                        <span className="font-black block truncate w-full">{member.name}</span>
                       </button>
                     )
                   })}

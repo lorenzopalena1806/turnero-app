@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 
 import { createClient as createJSClient } from '@supabase/supabase-js'
 
-export async function addStaffAction(tenantId: string, name: string, email?: string, password?: string) {
+export async function addStaffAction(tenantId: string, name: string, email?: string, password?: string, imageUrl?: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autorizado' }
@@ -32,10 +32,10 @@ export async function addStaffAction(tenantId: string, name: string, email?: str
     authUserId = authData.user.id
   }
 
-  // Insertar en la tabla staff
   const { data: staffData, error } = await supabase.from('staff').insert({
     tenant_id: tenantId,
     name,
+    image_url: imageUrl || null,
     is_active: true
   }).select('id').single()
 
@@ -119,4 +119,12 @@ export async function generateInviteLinkAction(tenantId: string, staffId: string
   
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   return { success: true, link: `${baseUrl}/invite/${data.token}` }
+}
+
+export async function editStaffAction(staffId: string, name: string, imageUrl?: string) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('staff').update({ name, image_url: imageUrl || null }).eq('id', staffId)
+  if (error) return { error: error.message }
+  revalidatePath('/dashboard/staff')
+  return { success: true }
 }
