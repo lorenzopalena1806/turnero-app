@@ -12,6 +12,7 @@ export default function TenantSettingsForm({
 }) {
   const [isPending, startTransition] = useTransition()
   
+  const [name, setName] = useState(tenant.name || '')
   const [staffLabel, setStaffLabel] = useState(tenant.staff_label || 'Profesional')
   const [serviceLabel, setServiceLabel] = useState(tenant.service_label || 'Servicio')
   const [themeColor, setThemeColor] = useState(tenant.theme_color || '#8b5cf6')
@@ -28,6 +29,7 @@ export default function TenantSettingsForm({
     e.preventDefault()
     startTransition(async () => {
       await updateTenantSettingsAction(tenant.id, {
+        name: name,
         staff_label: staffLabel,
         service_label: serviceLabel,
         theme_color: themeColor,
@@ -48,6 +50,18 @@ export default function TenantSettingsForm({
       <h3 className="text-xl font-black text-indigo-950 mb-6">Personalización de Tienda</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div>
+          <label className="block text-xs font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">Nombre del Local</label>
+          <input 
+            type="text" 
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+            placeholder="Ej: Barbería VIP"
+            className="w-full bg-indigo-50/50 border-2 border-indigo-100 rounded-2xl px-5 py-4 text-indigo-950 focus:outline-none focus:border-purple-400 font-bold text-sm"
+          />
+        </div>
+
         <div>
           <label className="block text-xs font-bold text-indigo-900/50 uppercase tracking-widest mb-2 ml-1">URL de tu Logo</label>
           <input 
