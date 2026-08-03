@@ -292,9 +292,15 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
                     </div>
                     <button 
                       onClick={startCheckout}
-                      className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                      className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 mb-3"
                     >
                       Asignar Horarios <ArrowRight className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={handleClose}
+                      className="w-full py-3 border-2 border-slate-700 text-slate-300 hover:text-white rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center justify-center"
+                    >
+                      + Agregar otro servicio
                     </button>
                   </div>
                 </>
