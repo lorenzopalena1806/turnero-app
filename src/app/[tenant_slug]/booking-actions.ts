@@ -1,15 +1,16 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { parseISO, addMinutes, format, startOfDay, endOfDay } from 'date-fns'
 
 export async function getAvailableSlots(tenantId: string, dateString: string, durationMinutes: number, staffId: string) {
-  const supabase = await createClient()
+  const adminAuthClient = createAdminClient()
   
   const date = parseISO(dateString)
   const dayOfWeek = date.getDay()
 
-  const { data: schedule } = await supabase
+  const { data: schedule } = await adminAuthClient
     .from('staff_schedules')
     .select('*')
     .eq('tenant_id', tenantId)
@@ -55,7 +56,7 @@ export async function getAvailableSlots(tenantId: string, dateString: string, du
   const startOfDayUtc = startOfDay(date).toISOString()
   const endOfDayUtc = endOfDay(date).toISOString()
 
-  const { data: appointments } = await supabase
+  const { data: appointments } = await adminAuthClient
     .from('appointments')
     .select('start_time, end_time')
     .eq('tenant_id', tenantId)
@@ -65,7 +66,7 @@ export async function getAvailableSlots(tenantId: string, dateString: string, du
     .lte('start_time', endOfDayUtc)
 
   // Get blocked slots
-  const { data: blocks } = await supabase
+  const { data: blocks } = await adminAuthClient
     .from('blocked_slots')
     .select('start_time, end_time')
     .eq('tenant_id', tenantId)
