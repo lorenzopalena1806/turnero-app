@@ -163,14 +163,6 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
     setError('')
     
     if (currentItemIndex < selections.length - 1) {
-      const nextSelections = [...selections]
-      // Pre-fill next selection to speed up booking process for multiple items
-      if (!nextSelections[currentItemIndex + 1].staffId) {
-        nextSelections[currentItemIndex + 1].staffId = currentSelection.staffId
-        nextSelections[currentItemIndex + 1].date = currentSelection.date
-        nextSelections[currentItemIndex + 1].customerName = currentSelection.customerName
-      }
-      setSelections(nextSelections)
       setCurrentItemIndex(currentItemIndex + 1)
     } else {
       setStep('INFO')
