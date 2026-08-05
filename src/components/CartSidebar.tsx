@@ -1,7 +1,7 @@
 'use client'
 
 import { useCart } from './CartProvider'
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { X, Calendar, Clock, User, Trash2, ArrowRight } from 'lucide-react'
 import { addDays, format, isSameDay } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -29,6 +29,7 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
   const [currentItemIndex, setCurrentItemIndex] = useState(0)
   
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
   const [isPending, startTransition] = useTransition()
   
   const [customerPhone, setCustomerPhone] = useState('')
@@ -49,25 +50,39 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
   }
 
   const startCheckout = () => {
-    // Unroll the cart items based on their quantity
-    const initialSelections: ItemSelection[] = []
+    // Preserve existing selections if they match the cart items
+    const newSelections: ItemSelection[] = []
+    const availableExisting = [...selections] // Pool of existing selections to consume
+
     items.forEach(item => {
       for (let i = 0; i < item.quantity; i++) {
-        initialSelections.push({
-          cartItemId: item.id,
-          serviceName: item.name,
-          price: item.price,
-          duration: item.duration || 30, // CartProvider sets duration_minutes to duration
-          staffId: null,
-          date: null,
-          time: null,
-          customerName: '',
-          originalService: item
-        })
+        const existingIdx = availableExisting.findIndex(s => s.cartItemId === item.id)
+        if (existingIdx !== -1) {
+          // Re-use existing selection
+          newSelections.push(availableExisting[existingIdx])
+          availableExisting.splice(existingIdx, 1) // Remove from pool
+        } else {
+          // Create new selection
+          newSelections.push({
+            cartItemId: item.id,
+            serviceName: item.name,
+            price: item.price,
+            duration: item.duration || 30,
+            staffId: null,
+            date: null,
+            time: null,
+            customerName: selections[0]?.customerName || '', // Prefill customer name if possible
+            originalService: item
+          })
+        }
       }
     })
-    setSelections(initialSelections)
-    setCurrentItemIndex(0)
+    
+    setSelections(newSelections)
+    
+    // Jump to the first incomplete item
+    const firstIncomplete = newSelections.findIndex(s => !s.staffId || !s.date || !s.time || !s.customerName)
+    setCurrentItemIndex(firstIncomplete >= 0 ? firstIncomplete : 0)
     setStep('ASSIGNING')
   }
 
@@ -85,39 +100,56 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
 
   const handleDateSelect = (date: Date) => {
     updateCurrentSelection({ date, time: null })
-    const dateString = format(date, 'yyyy-MM-dd')
-    
-    startTransition(async () => {
-      const staffId = currentSelection.staffId
-      if (!staffId) return
-      let slots = await getAvailableSlots(tenantId, dateString, currentSelection.duration, staffId)
-      
-      // Filter out slots that conflict with other selections already made in this cart
-      const otherSelections = selections.filter((s, idx) => 
-        idx !== currentItemIndex && 
-        s.staffId === staffId && 
-        s.date && format(s.date, 'yyyy-MM-dd') === dateString && 
-        s.time
-      )
-
-      if (otherSelections.length > 0) {
-        slots = slots.filter(slot => {
-          const slotStart = new Date(`${dateString}T${slot}:00`)
-          const slotEnd = new Date(slotStart.getTime() + currentSelection.duration * 60000)
-
-          const isOverlapping = otherSelections.some(other => {
-            const otherStart = new Date(`${dateString}T${other.time}:00`)
-            const otherEnd = new Date(otherStart.getTime() + other.duration * 60000)
-            return (slotStart < otherEnd && slotEnd > otherStart)
-          })
-
-          return !isOverlapping
-        })
-      }
-
-      setAvailableSlots(slots)
-    })
   }
+
+  // Fetch available slots automatically when current item's staff and date are selected
+  useEffect(() => {
+    if (!currentSelection?.staffId || !currentSelection?.date) {
+      setAvailableSlots([])
+      return
+    }
+
+    const fetchSlots = async () => {
+      setIsLoadingSlots(true)
+      const dateString = format(currentSelection.date!, 'yyyy-MM-dd')
+      const staffId = currentSelection.staffId!
+      
+      try {
+        let slots = await getAvailableSlots(tenantId, dateString, currentSelection.duration, staffId)
+        
+        // Filter out slots that conflict with other selections already made in this cart
+        const otherSelections = selections.filter((s, idx) => 
+          idx !== currentItemIndex && 
+          s.staffId === staffId && 
+          s.date && format(s.date, 'yyyy-MM-dd') === dateString && 
+          s.time
+        )
+
+        if (otherSelections.length > 0) {
+          slots = slots.filter(slot => {
+            const slotStart = new Date(`${dateString}T${slot}:00`)
+            const slotEnd = new Date(slotStart.getTime() + currentSelection.duration * 60000)
+
+            const isOverlapping = otherSelections.some(other => {
+              const otherStart = new Date(`${dateString}T${other.time}:00`)
+              const otherEnd = new Date(otherStart.getTime() + other.duration * 60000)
+              return (slotStart < otherEnd && slotEnd > otherStart)
+            })
+
+            return !isOverlapping
+          })
+        }
+
+        setAvailableSlots(slots)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setIsLoadingSlots(false)
+      }
+    }
+
+    fetchSlots()
+  }, [currentSelection?.staffId, currentSelection?.date?.getTime(), currentItemIndex, selections, tenantId])
 
   const handleTimeSelect = (time: string) => {
     updateCurrentSelection({ time })
@@ -131,8 +163,15 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
     setError('')
     
     if (currentItemIndex < selections.length - 1) {
+      const nextSelections = [...selections]
+      // Pre-fill next selection to speed up booking process for multiple items
+      if (!nextSelections[currentItemIndex + 1].staffId) {
+        nextSelections[currentItemIndex + 1].staffId = currentSelection.staffId
+        nextSelections[currentItemIndex + 1].date = currentSelection.date
+        nextSelections[currentItemIndex + 1].customerName = currentSelection.customerName
+      }
+      setSelections(nextSelections)
       setCurrentItemIndex(currentItemIndex + 1)
-      setAvailableSlots([])
     } else {
       setStep('INFO')
     }
@@ -388,7 +427,7 @@ export default function CartSidebar({ tenantId, tenantName, whatsappNumber, staf
               {currentSelection.date && (
                 <div className="space-y-2">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">4. Elige Horario</label>
-                  {isPending ? (
+                  {isLoadingSlots ? (
                     <div className="text-center py-6"><div className="w-6 h-6 mx-auto rounded-full border-2 border-purple-500 border-t-transparent animate-spin" /></div>
                   ) : availableSlots.length === 0 ? (
                     <div className="text-center py-6 bg-slate-100 rounded-2xl font-bold text-slate-500">No hay horarios.</div>
